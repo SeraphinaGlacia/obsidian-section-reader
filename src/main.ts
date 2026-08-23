@@ -7,7 +7,7 @@ import {
 } from "obsidian";
 import type { ViewState, WorkspaceLeaf } from "obsidian";
 import { cardIndexForLine, createCardDocument } from "./cards";
-import { VIEW_TYPE_FOCUS_CARDS } from "./constants";
+import { HOVER_LINK_SOURCE_FOCUS_CARDS, VIEW_TYPE_FOCUS_CARDS } from "./constants";
 import { FocusCardsView } from "./focus-cards-view";
 import { translationsForLanguage } from "./i18n";
 import { ProgressStore } from "./progress-store";
@@ -67,6 +67,10 @@ export default class FocusCardsPlugin extends Plugin {
       VIEW_TYPE_FOCUS_CARDS,
       (leaf) => new FocusCardsView(leaf, this),
     );
+    this.registerHoverLinkSource(HOVER_LINK_SOURCE_FOCUS_CARDS, {
+      display: this.manifest.name,
+      defaultMod: false,
+    });
 
     this.addRibbonIcon("gallery-horizontal", this.text.ribbon, () => {
       void this.toggleActiveLeaf();

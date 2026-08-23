@@ -43,6 +43,21 @@ export function internalLinkFromEvent(event: MouseEvent): HTMLAnchorElement | nu
   return anchor instanceof HTMLAnchorElement ? anchor : null;
 }
 
+export function internalLinkFromHoverEvent(event: MouseEvent): HTMLAnchorElement | null {
+  if (!(event.target instanceof Element)) return null;
+  const anchor = event.target.closest("a.internal-link");
+  if (!(anchor instanceof HTMLAnchorElement)) return null;
+  if (event.relatedTarget instanceof Node && anchor.contains(event.relatedTarget)) return null;
+  return anchor;
+}
+
+export function internalLinkText(anchor: HTMLAnchorElement): string | null {
+  const dataHref = anchor.dataset.href;
+  if (dataHref !== undefined && dataHref.length > 0) return dataHref;
+  const href = anchor.getAttribute("href");
+  return href !== null && href.length > 0 ? href : null;
+}
+
 export function setCardAccessibility(
   cards: readonly HTMLElement[],
   activeIndex: number,

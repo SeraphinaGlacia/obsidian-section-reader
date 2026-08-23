@@ -8,6 +8,8 @@ import {
 } from "obsidian";
 import type {
   CachedMetadata,
+  HoverParent,
+  HoverPopover,
   IconName,
   TFile,
   ViewState,
@@ -22,7 +24,11 @@ import {
 } from "./cards";
 import type { CardDocument } from "./cards";
 import { ComponentSlot } from "./component-slot";
-import { CARD_ANIMATION_MS, VIEW_TYPE_FOCUS_CARDS } from "./constants";
+import {
+  CARD_ANIMATION_MS,
+  HOVER_LINK_SOURCE_FOCUS_CARDS,
+  VIEW_TYPE_FOCUS_CARDS,
+} from "./constants";
 import { EdgeDoubleTapGesture, edgeTapSideForPosition } from "./edge-tap";
 import { splitRenderedDocument } from "./render-dom";
 import { findTaskLocations, updateTaskSource } from "./tasks";
@@ -33,6 +39,8 @@ import {
   formatViewTitle,
   hasActiveTextSelection,
   internalLinkFromEvent,
+  internalLinkFromHoverEvent,
+  internalLinkText,
   isInteractiveTarget,
   setCardAccessibility,
   setReadableLineWidth,
@@ -91,7 +99,9 @@ function cardScrollKey(cardDocument: CardDocument, cardIndex: number): string {
   return `${card.key}:${occurrence}`;
 }
 
-export class FocusCardsView extends FileView {
+export class FocusCardsView extends FileView implements HoverParent {
+  hoverPopover: HoverPopover | null = null;
+
   private readonly plugin: FocusCardsPlugin;
   private readonly edgeDoubleTap = new EdgeDoubleTapGesture();
   private readonly scrollPositions = new Map<string, number>();
@@ -227,6 +237,7 @@ export class FocusCardsView extends FileView {
     this.contentEl.append(this.shellEl);
     this.registerMobileEdgeDoubleTap(this.viewportEl);
     this.registerDomEvent(this.trackEl, "click", (event) => this.handleTrackClick(event));
+    this.registerDomEvent(this.trackEl, "mouseover", (event) => this.handleTrackHover(event));
 
     if (this.file) await this.renderFile(this.file);
   }
@@ -545,11 +556,26 @@ export class FocusCardsView extends FileView {
   private handleTrackClick(event: MouseEvent): void {
     const anchor = internalLinkFromEvent(event);
     if (anchor === null || !this.file) return;
-    const link = anchor.dataset.href ?? anchor.getAttribute("href");
-    if (link === null || link.length === 0) return;
+    const link = internalLinkText(anchor);
+    if (link === null) return;
     event.preventDefault();
     event.stopPropagation();
     void this.app.workspace.openLinkText(link, this.file.path, "tab");
+  }
+
+  private handleTrackHover(event: MouseEvent): void {
+    const anchor = internalLinkFromHoverEvent(event);
+    if (anchor === null || !this.file) return;
+    const linktext = internalLinkText(anchor);
+    if (linktext === null) return;
+    this.app.workspace.trigger("hover-link", {
+      event,
+      source: HOVER_LINK_SOURCE_FOCUS_CARDS,
+      hoverParent: this,
+      targetEl: anchor,
+      linktext,
+      sourcePath: this.file.path,
+    });
   }
 
   private showRenderError(error: unknown): void {

@@ -4,6 +4,8 @@ import {
   formatCounter,
   formatViewTitle,
   internalLinkFromEvent,
+  internalLinkFromHoverEvent,
+  internalLinkText,
   isInteractiveTarget,
   navigationDirectionForKey,
   setCardAccessibility,
@@ -83,5 +85,41 @@ describe("card UI helpers", () => {
 
     span.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 1 }));
     expect(detected[1]).toBeNull();
+  });
+
+  it("identifies an internal link once when the pointer enters it", () => {
+    const wrapper = document.createElement("div");
+    const anchor = document.createElement("a");
+    anchor.className = "internal-link";
+    anchor.dataset.href = "Folder/Note#Heading";
+    anchor.href = "app://obsidian.md/Folder/Note#Heading";
+    const span = document.createElement("span");
+    span.textContent = "Preview";
+    anchor.append(span);
+    wrapper.append(anchor);
+
+    const detected: Array<HTMLAnchorElement | null> = [];
+    wrapper.addEventListener("mouseover", (event) => {
+      detected.push(internalLinkFromHoverEvent(event));
+    });
+    span.dispatchEvent(
+      new MouseEvent("mouseover", { bubbles: true, relatedTarget: wrapper }),
+    );
+    span.dispatchEvent(
+      new MouseEvent("mouseover", { bubbles: true, relatedTarget: anchor }),
+    );
+
+    expect(detected[0]).toBe(anchor);
+    expect(internalLinkText(detected[0]!)).toBe("Folder/Note#Heading");
+    expect(detected[1]).toBeNull();
+  });
+
+  it("falls back to the link href when rendered metadata is unavailable", () => {
+    const anchor = document.createElement("a");
+    anchor.className = "internal-link";
+    anchor.setAttribute("href", "Fallback note");
+    expect(internalLinkText(anchor)).toBe("Fallback note");
+    anchor.removeAttribute("href");
+    expect(internalLinkText(anchor)).toBeNull();
   });
 });
