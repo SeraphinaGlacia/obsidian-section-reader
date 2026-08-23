@@ -1,0 +1,50 @@
+{
+  "name": "obsidian-focus-cards",
+  "version": "0.1.0",
+  "description": "Review long Obsidian notes as focused cards separated by exact root-level Markdown horizontal rules.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "typecheck:min": "tsc -p tsconfig.min.json --noEmit --skipLibCheck",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run typecheck:min && npm run lint && npm run test && npm run build",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "flashcards",
+    "markdown",
+    "review"
+  ],
+  "author": "Xinlei Zhou",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SeraphinaGlacia/obsidian-focus-cards.git"
+  },
+  "homepage": "https://github.com/SeraphinaGlacia/obsidian-focus-cards#readme",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^26.2.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.4",
+    "eslint-plugin-obsidianmd": "^0.4.1",
+    "globals": "^17.11.0",
+    "jsdom": "^26.1.0",
+    "obsidian": "^1.13.1",
+    "obsidian-min": "npm:obsidian@1.8.7",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.11"
+  }
+}

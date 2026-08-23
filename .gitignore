@@ -119,6 +119,12 @@ dist
 # Firebase cache directory
 .firebase/
 
+# Focus Cards build and local test artifacts
+main.js
+.vitest/
+test-vault/
+.obsidian/
+
 # TernJS port file
 .tern-port
 
