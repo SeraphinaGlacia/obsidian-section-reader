@@ -1,6 +1,6 @@
 {
   "name": "obsidian-focus-cards",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Review long Obsidian notes as focused cards separated by exact root-level Markdown horizontal rules.",
   "main": "main.js",
   "type": "module",
