@@ -4,7 +4,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["main.js", "node_modules/", "coverage/", "test-vault/"] },
+  { ignores: ["main.js", "node_modules/", "coverage/", "test-vault/", "tmp/"] },
   eslint.configs.recommended,
   ...obsidianmd.configs.recommended,
   {

@@ -123,6 +123,7 @@ dist
 main.js
 .vitest/
 test-vault/
+tmp/
 .obsidian/
 
 # TernJS port file
