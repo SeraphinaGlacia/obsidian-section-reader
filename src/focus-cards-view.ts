@@ -5,6 +5,8 @@ import {
   Platform,
   Scope,
   getFrontMatterInfo,
+  parseLinktext,
+  resolveSubpath,
 } from "obsidian";
 import type {
   CachedMetadata,
@@ -26,6 +28,7 @@ import type { CardDocument } from "./cards";
 import { ComponentSlot } from "./component-slot";
 import {
   CARD_ANIMATION_MS,
+  CARD_JUMP_ANIMATION_MS,
   HOVER_LINK_SOURCE_FOCUS_CARDS,
   VIEW_TYPE_FOCUS_CARDS,
 } from "./constants";
@@ -122,6 +125,8 @@ export class FocusCardsView extends FileView implements HoverParent {
   private renderVersion = 0;
   private markerSerial = 0;
   private metadataResolved = false;
+  private rendering = false;
+  private pendingNavigation: Record<string, unknown> | null = null;
 
   constructor(leaf: WorkspaceLeaf, plugin: FocusCardsPlugin) {
     super(leaf);
@@ -157,6 +162,12 @@ export class FocusCardsView extends FileView implements HoverParent {
     return "gallery-horizontal";
   }
 
+  canAcceptExtension(extension: string): boolean {
+    // Keep this leaf's view when Obsidian opens a heading, search result, or another note.
+    // New leaves still use Obsidian's default Markdown view.
+    return extension === "md";
+  }
+
   getState(): Record<string, unknown> {
     const state = super.getState();
     const persistedIndex = this.metadataResolved ? this.currentIndex : this.preferredIndex;
@@ -175,12 +186,29 @@ export class FocusCardsView extends FileView implements HoverParent {
 
   async setState(state: unknown, result: ViewStateResult): Promise<void> {
     if (isRecord(state)) {
-      this.preferredIndex = readNonNegativeInteger(state.cardIndex) ?? 0;
-      this.preferredKey = typeof state.cardKey === "string" ? state.cardKey : undefined;
-      this.preferredCursorLine = readNonNegativeInteger(state.cursorLine);
-      this.readableLineWidth =
-        typeof state.readableLineWidth === "boolean" ? state.readableLineWidth : true;
-      this.returnView = readReturnView(state.returnView);
+      if (typeof state.file === "string" && state.file !== this.file?.path) {
+        this.persistProgress();
+        const saved = this.plugin.progress.get(state.file);
+        this.preferredIndex = readNonNegativeInteger(state.cardIndex) ?? saved?.index ?? 0;
+        this.preferredKey = typeof state.cardKey === "string" ? state.cardKey : saved?.cardKey;
+        this.preferredCursorLine = readNonNegativeInteger(state.cursorLine);
+        this.returnView = readReturnView(state.returnView);
+        this.metadataResolved = false;
+        this.pendingNavigation = null;
+        this.scrollPositions.clear();
+      } else if (this.metadataResolved) {
+        const index = readNonNegativeInteger(state.cardIndex);
+        if (index !== undefined) {
+          this.selectCard(resolveCardIndex(
+            this.cardDocument,
+            index,
+            typeof state.cardKey === "string" ? state.cardKey : undefined,
+          ), 0);
+        }
+      }
+      if (typeof state.readableLineWidth === "boolean") {
+        this.readableLineWidth = state.readableLineWidth;
+      }
       this.plugin.trackView(
         this.leaf,
         typeof state.file === "string" ? state.file : undefined,
@@ -188,7 +216,18 @@ export class FocusCardsView extends FileView implements HoverParent {
       );
     }
     await super.setState(state, result);
-    if (this.file && this.shellEl !== null) await this.renderFile(this.file);
+  }
+
+  setEphemeralState(state: unknown): void {
+    super.setEphemeralState(state);
+    if (!isRecord(state)) return;
+    if (typeof state.subpath !== "string" && readNonNegativeInteger(state.line) === undefined) {
+      return;
+    }
+    // Obsidian can send the destination before the metadata cache or renderer is ready.
+    // Keep only the latest request, then consume it after a complete render.
+    this.pendingNavigation = state;
+    this.applyPendingNavigation();
   }
 
   getReturnView(): ReturnViewSnapshot | undefined {
@@ -211,6 +250,7 @@ export class FocusCardsView extends FileView implements HoverParent {
 
   handleMetadataChanged(data: string, cache: CachedMetadata): void {
     if (!this.file) return;
+    this.rendering = true;
     const version = ++this.renderVersion;
     void this.renderSource(this.file, data, cache, version);
   }
@@ -245,6 +285,7 @@ export class FocusCardsView extends FileView implements HoverParent {
   protected async onClose(): Promise<void> {
     this.plugin.scheduleClosedViewRestore(this.leaf, this.file?.path, this.returnView);
     this.renderVersion += 1;
+    this.pendingNavigation = null;
     this.edgeDoubleTap.reset();
     this.persistProgress();
     this.renderComponents.clear();
@@ -276,7 +317,7 @@ export class FocusCardsView extends FileView implements HoverParent {
   }
 
   onResize(): void {
-    this.applyTransform(0, false);
+    this.applyTransform(0);
   }
 
   private shouldHandleKey(event: KeyboardEvent): boolean {
@@ -286,20 +327,61 @@ export class FocusCardsView extends FileView implements HoverParent {
   private navigate(direction: -1 | 1): boolean {
     const nextIndex = this.currentIndex + direction;
     if (nextIndex < 0 || nextIndex >= this.cardDocument.cards.length) {
-      this.applyTransform(0, true);
+      this.applyTransform(CARD_ANIMATION_MS);
       return false;
     }
 
+    this.pendingNavigation = null;
+    this.selectCard(nextIndex, CARD_ANIMATION_MS);
+    return true;
+  }
+
+  private selectCard(nextIndex: number, duration: number): void {
     this.currentIndex = nextIndex;
     this.preferredIndex = nextIndex;
     this.preferredKey = this.cardDocument.cards[nextIndex]?.key;
     this.updateActiveCard();
-    this.applyTransform(0, true);
+    this.applyTransform(duration);
     this.persistProgress();
-    return true;
+  }
+
+  private applyPendingNavigation(): void {
+    const navigation = this.pendingNavigation;
+    if (navigation === null || this.rendering || !this.metadataResolved || !this.file) return;
+    const cache = this.app.metadataCache.getFileCache(this.file);
+    if (cache === null) return;
+    const target = typeof navigation.subpath === "string"
+      ? resolveSubpath(cache, navigation.subpath)
+      : null;
+    const line = target?.start.line ?? readNonNegativeInteger(navigation.line);
+    this.pendingNavigation = null;
+    if (line === undefined) return;
+
+    const index = cardIndexForLine(this.cardDocument, line);
+    this.selectCard(index, CARD_JUMP_ANIMATION_MS);
+    const panel = this.cardElements[index];
+    const card = this.cardDocument.cards[index];
+    if (panel === undefined || card === undefined) return;
+
+    // Match headings by source order, so repeated titles and nested headings work too.
+    // Embedded notes have their own headings and must not shift this note's destinations.
+    const headings = cache.headings?.filter((heading) =>
+      heading.position.start.offset >= card.start && heading.position.start.offset < card.end,
+    ) ?? [];
+    const headingIndex = headings.findIndex((heading) => heading.position.start.line === line);
+    const renderedHeadings = [...panel.querySelectorAll<HTMLElement>(
+      "h1[data-heading], h2[data-heading], h3[data-heading], h4[data-heading], h5[data-heading], h6[data-heading]",
+    )]
+      .filter((heading) => heading.closest(".internal-embed") === null);
+    const element = renderedHeadings[headingIndex];
+    // Scroll the card only. scrollIntoView would also scroll the horizontal viewport.
+    panel.scrollTop = element === undefined ? 0 :
+      panel.scrollTop + element.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    this.scrollPositions.set(cardScrollKey(this.cardDocument, index), panel.scrollTop);
   }
 
   private async renderFile(file: TFile): Promise<void> {
+    this.rendering = true;
     const version = ++this.renderVersion;
     const source = await this.app.vault.cachedRead(file);
     if (version !== this.renderVersion || this.file?.path !== file.path) return;
@@ -379,12 +461,16 @@ export class FocusCardsView extends FileView implements HoverParent {
       this.cardElements = elements;
       this.currentIndex = nextIndex;
       if (metadataAvailable) this.metadataResolved = true;
+      this.rendering = false;
       this.updateActiveCard();
-      this.applyTransform(0, false);
+      this.applyTransform(0);
+      this.applyPendingNavigation();
       this.persistProgress();
     } catch (error) {
       this.removeChild(renderComponent);
       if (version === this.renderVersion) this.showRenderError(error);
+    } finally {
+      if (version === this.renderVersion) this.rendering = false;
     }
   }
 
@@ -479,13 +565,11 @@ export class FocusCardsView extends FileView implements HoverParent {
     }
   }
 
-  private applyTransform(offset: number, animate: boolean): void {
+  private applyTransform(duration: number): void {
     if (this.trackEl === null) return;
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    const duration = animate && !reducedMotion ? CARD_ANIMATION_MS : 0;
-    this.trackEl.style.transitionDuration = `${duration}ms`;
-    this.trackEl.style.transform =
-      `translate3d(calc(${-this.currentIndex * 100}% + ${offset}px), 0, 0)`;
+    this.trackEl.style.transitionDuration = `${reducedMotion ? 0 : duration}ms`;
+    this.trackEl.style.transform = `translate3d(${-this.currentIndex * 100}%, 0, 0)`;
   }
 
   private registerMobileEdgeDoubleTap(viewport: HTMLElement): void {
@@ -560,6 +644,14 @@ export class FocusCardsView extends FileView implements HoverParent {
     if (link === null) return;
     event.preventDefault();
     event.stopPropagation();
+    const { path, subpath } = parseLinktext(link);
+    const target = path.length === 0 ? this.file :
+      this.app.metadataCache.getFirstLinkpathDest(path, this.file.path);
+    if (target?.path === this.file.path && subpath.length > 0 &&
+      !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      this.setEphemeralState({ subpath });
+      return;
+    }
     void this.app.workspace.openLinkText(link, this.file.path, "tab");
   }
 
@@ -589,6 +681,6 @@ export class FocusCardsView extends FileView implements HoverParent {
     this.cardElements = [panel];
     this.currentIndex = 0;
     this.updateActiveCard();
-    this.applyTransform(0, false);
+    this.applyTransform(0);
   }
 }

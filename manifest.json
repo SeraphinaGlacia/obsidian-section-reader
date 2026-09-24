@@ -1,7 +1,7 @@
 {
   "id": "focus-cards",
   "name": "Focus Cards",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.8.7",
   "description": "通过分割线将单篇长文档切分成类似 PPT、卡片的交互形式，极大提升阅读体验。",
   "author": "SeraphinaGlacia",
