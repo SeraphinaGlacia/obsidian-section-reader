@@ -1,16 +1,22 @@
-# Section Reader
+<h1 align="center">Section Reader</h1>
+
+<p align="center">
+  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="#installation">Install</a> ·
+  <a href="#quick-start">Try It</a>
+</p>
 
 Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.
 
 An Obsidian plugin that turns sections separated by root-level `---` lines into a focused reading view. Your note stays in one file.
 
-[简体中文](README.zh-CN.md) · [Install](#installation) · [Try it](#quick-start)
-
 ## See it in action
 
-![Section Reader walkthrough: ordinary note, focused section, next section, Outline jump, same-note link, and return to the note](docs/media/section-reader-demo.gif)
+![Continuous screen recording: scroll the full note, press the demo shortcut, and navigate sections with right and left arrow keys](docs/media/section-reader-demo.gif)
 
-A step-by-step walkthrough assembled from real Obsidian screenshots: toggle Section Reader → move right to the next section → jump using the Outline → follow a same-note link → press `Esc` to return.
+A continuous screen recording: scroll through the full note → press **Ctrl + Alt + U** → read one section at a time → use **→ / ←** to move forward and back. The key labels show the actual recorded inputs.
+
+**Ctrl + Alt + U is a custom shortcut configured only for this demo.** Section Reader does not assign a toggle hotkey by default; choose your own under **Settings → Hotkeys**.
 
 Captured on Obsidian 1.13.7 for Linux using this repository's Section Reader build and the [synthetic demo note](docs/demo-note.md).
 
@@ -36,6 +42,20 @@ Captured on Obsidian 1.13.7 for Linux using this repository's Section Reader bui
 Reading in card view does not rewrite your Markdown. Checking or unchecking a task does update its Markdown checkbox, just as it does in Obsidian's normal reading view.
 
 Requires **Obsidian 1.8.7 or later**. Designed for desktop and mobile. Mobile interaction has been checked in a simulator; physical iOS and Android devices have not yet been verified.
+
+## Which workflow fits?
+
+Section Reader is for reading and revisiting **one long note, one author-defined section at a time**. Root-level `---` lines define the sections; the original file and its native Markdown context stay together.
+
+| If you want to… | Consider |
+| --- | --- |
+| Read sections of one note sequentially and resume your saved position | **Section Reader** |
+| Highlight the active paragraph or block while dimming or blurring surrounding content | [Focus Lens](https://github.com/juanchiparra/obsidian-focus-lens) |
+| Browse many notes as a card overview, with sorting, pins, search, and tags | [Cards View](https://github.com/jillro/obsidian-cards-view-plugin) |
+| Build presentation slide decks with themes, live preview, and PDF or HTML export | [Advanced Slides](https://github.com/MSzturc/obsidian-advanced-slides) |
+| Schedule memory reviews using flashcards and entire notes | [Spaced Repetition](https://github.com/st3v3nmw/obsidian-spaced-repetition) |
+
+These tools can complement each other. This is a comparison of their documented workflows, not an exhaustive feature audit. Section Reader's scope is focused reading with native note connections; it does not provide presentation export or a spaced-review scheduler.
 
 ## Quick start
 
