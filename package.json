@@ -1,7 +1,7 @@
 {
   "name": "obsidian-section-reader",
-  "version": "0.2.1",
-  "description": "Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.",
+  "version": "0.2.2",
+  "description": "Read long notes one section at a time, without splitting files.",
   "main": "main.js",
   "type": "module",
   "scripts": {

@@ -6,7 +6,7 @@
   <a href="#32-使用">开始使用</a>
 </p>
 
-> Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.
+> 逐段阅读长笔记，无需拆分文件。
 
 Section Reader 是一款 Obsidian 长笔记阅读插件：把根层级 `---` 分隔的段落变成一次只显示一段的阅读视图，仍保留原生链接、嵌入、任务交互与阅读进度，笔记始终保存在同一个文件中。浏览本身不会修改 Markdown；主动勾选或取消任务复选框时，会更新对应的 Markdown 标记。
 
