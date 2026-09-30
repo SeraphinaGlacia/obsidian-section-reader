@@ -1,10 +1,10 @@
 ---
-title: Focus Cards demo
+title: Section Reader demo
 ---
 
 # Start with one idea
 
-This is a synthetic example note for trying Focus Cards. Copy it into your Obsidian vault, then run **Focus Cards: Toggle card browsing mode**.
+This is a synthetic example note for trying Section Reader. Copy it into your Obsidian vault, then run **Section Reader: Toggle card browsing mode**.
 
 Each section is separated by a root-level horizontal rule. Read one section, then move to the next when you are ready.
 
