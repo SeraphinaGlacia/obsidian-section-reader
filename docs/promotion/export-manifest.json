@@ -1,0 +1,58 @@
+{
+  "theme": {
+    "width": 1200,
+    "height": 800,
+    "font": "Arial, Helvetica, sans-serif",
+    "background": "#F6F4F0",
+    "ink": "#1B1920",
+    "muted": "#68636F",
+    "accent": "#8861D8",
+    "border": "#D8D3DE",
+    "screen": "#1E1E1E",
+    "margin": 48,
+    "headingSize": 54,
+    "subtitleSize": 20,
+    "labelSize": 12,
+    "footerSize": 13,
+    "frameY": 224,
+    "frameHeight": 504,
+    "radius": 12
+  },
+  "images": [
+    {
+      "slug": "01-one-idea",
+      "title": "One idea at a time.",
+      "width": 1200,
+      "height": 800,
+      "bytes": 71388
+    },
+    {
+      "slug": "02-clear-sections",
+      "title": "One note. Clear sections.",
+      "width": 1200,
+      "height": 800,
+      "bytes": 87417
+    },
+    {
+      "slug": "03-native-notes",
+      "title": "Your notes still work.",
+      "width": 1200,
+      "height": 800,
+      "bytes": 86824
+    },
+    {
+      "slug": "04-stay-connected",
+      "title": "Stay connected as you read.",
+      "width": 1200,
+      "height": 800,
+      "bytes": 92649
+    },
+    {
+      "slug": "05-reading-progress",
+      "title": "Pick up where you left off.",
+      "width": 1200,
+      "height": 800,
+      "bytes": 95602
+    }
+  ]
+}

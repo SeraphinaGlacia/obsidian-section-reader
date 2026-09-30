@@ -37,7 +37,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["esbuild.config.mjs", "eslint.config.mjs", "version-bump.mjs", "scripts/**/*.mjs"],
+    files: ["esbuild.config.mjs", "eslint.config.mjs", "version-bump.mjs", "scripts/**/*.mjs", "docs/promotion/render.mjs"],
     rules: {
       "obsidianmd/no-nodejs-modules": "off",
     },
