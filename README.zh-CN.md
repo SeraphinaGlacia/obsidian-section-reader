@@ -65,7 +65,7 @@ Section Reader 是一款面向 Obsidian 长笔记复习的卡片浏览插件。�
 
 ## 安装
 
-社区插件目录安装方式仅在正式上架后可用；此处不表示当前已上架或已有可下载的发布版本。手动安装时，将 [GitHub Release](https://github.com/SeraphinaGlacia/obsidian-focus-cards/releases) 中的 `main.js`、`manifest.json` 和 `styles.css` 放入：
+社区插件目录安装方式仅在正式上架后可用；此处不表示当前已上架或已有可下载的发布版本。手动安装时，将 [GitHub Release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases) 中的 `main.js`、`manifest.json` 和 `styles.css` 放入：
 
 ```text
 <vault>/.obsidian/plugins/focus-cards/
