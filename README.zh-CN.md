@@ -1,6 +1,10 @@
-# Section Reader
+<h1 align="center">Section Reader</h1>
 
-[English](README.md) · [安装](#安装) · [开始使用](#使用)
+<p align="center">
+  <a href="README.md">English</a> ·
+  <a href="#安装">安装</a> ·
+  <a href="#使用">开始使用</a>
+</p>
 
 Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.
 
@@ -10,11 +14,13 @@ Section Reader 是一款 Obsidian 长笔记阅读插件：把根层级 `---` 分
 
 ## 实际效果
 
-![Section Reader 操作演示：普通笔记、单段视图、下一段、大纲跳转、同笔记链接，以及返回原笔记](docs/media/section-reader-demo.gif)
+![连续屏幕录制：浏览整篇笔记、按演示快捷键进入单段视图，再用左右方向键翻页](docs/media/section-reader-demo.gif)
 
-以上逐步演示由真实 Obsidian 截图组成：切换 Section Reader → 向右翻到下一段 → 点击大纲跳转 → 点击同笔记链接 → 按 `Esc` 返回。
+以上为连续屏幕录制：从上到下浏览整篇笔记 → 按 **Ctrl + Alt + U** → 切换为逐段阅读 → 使用 **→ / ←** 前后翻页。按键标识对应录制时实际按下的键。
 
-截图使用 Linux 版 Obsidian 1.13.7、本仓库的 Section Reader 构建版本，以及内容完全虚构的[示例笔记](docs/demo-note.md)。
+**Ctrl + Alt + U 仅为本演示设置的自定义快捷键。** Section Reader 默认不分配切换快捷键，可在“设置 → 快捷键”中自行绑定。
+
+录屏使用 Linux 版 Obsidian 1.13.7、本仓库的 Section Reader 构建版本，以及内容完全虚构的[示例笔记](docs/demo-note.md)。
 
 <details>
 <summary>对比原笔记与单段视图</summary>
@@ -34,6 +40,20 @@ Section Reader 是一款 Obsidian 长笔记阅读插件：把根层级 `---` 分
 - **专注当前段落。** 把长篇阅读笔记或复习资料变成逐段浏览的卡片，不必拆分成多个文件
 - **记住阅读位置。** 用键盘或移动端边缘双击在卡片间移动，并从笔记保存的阅读进度继续
 - **保留内容之间的联系。** 通过大纲和同笔记标题、块链接跳转，继续使用 Obsidian 原生 Markdown 渲染、脚注、嵌入和任务交互
+
+## 哪种工具适合你的需求？
+
+Section Reader 面向**在一篇长笔记中，按自己划分的段落逐段阅读和回顾**。使用根层级 `---` 定义段落，原文件及其原生 Markdown 上下文仍保持完整。
+
+| 你想要…… | 可以考虑 |
+| --- | --- |
+| 逐段阅读同一篇笔记，并从保存的位置继续 | **Section Reader** |
+| 高亮当前段落或内容块，并调暗或模糊周围内容 | [Focus Lens](https://github.com/juanchiparra/obsidian-focus-lens) |
+| 以卡片概览浏览多篇笔记，进行排序、置顶、搜索和标签筛选 | [Cards View](https://github.com/jillro/obsidian-cards-view-plugin) |
+| 制作带主题和实时预览的演示文稿，并导出 PDF 或 HTML | [Advanced Slides](https://github.com/MSzturc/obsidian-advanced-slides) |
+| 为闪卡和整篇笔记安排记忆复习 | [Spaced Repetition](https://github.com/st3v3nmw/obsidian-spaced-repetition) |
+
+这些工具可以互补。上表比较的是各项目文档中的主要工作流程，并非完整功能审计。Section Reader 专注于保留笔记原生关联的逐段阅读，不提供演示文稿导出或间隔复习调度。
 
 ## 使用
 
