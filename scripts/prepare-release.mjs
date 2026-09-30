@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { request as httpsRequest } from "node:https";
 import { pathToFileURL } from "node:url";
 
 const repository = "SeraphinaGlacia/obsidian-section-reader";
@@ -123,26 +124,37 @@ export async function prepareRelease({ context, metadata, request }) {
   return { version, sha: context.sha, dispatched: true, runId: dispatched.data?.workflow_run_id };
 }
 
-// This CI-only script runs in Node, outside the Obsidian plugin runtime.
-// eslint-disable-next-line no-restricted-globals
-export function createGitHubRequest(token, fetchImpl = fetch) {
+export function createGitHubRequest(token, requestImpl = httpsRequest) {
   if (!token) throw new Error("GH_TOKEN is required");
-  return async (method, path, body) => {
-    const response = await fetchImpl(`https://api.github.com/${path}`, {
+  return (method, path, body) => new Promise((resolve, reject) => {
+    // Native HTTPS does not follow redirects or forward credentials to another host.
+    const request = requestImpl(new URL(`https://api.github.com/${path}`), {
       method,
       headers: {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${token}`,
         "X-GitHub-Api-Version": "2022-11-28",
         "Content-Type": "application/json",
+        "User-Agent": "section-reader-release-preparation",
       },
-      body: body === undefined ? undefined : JSON.stringify(body),
-      redirect: "error",
       signal: AbortSignal.timeout(30000),
+    }, (response) => {
+      let text = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => { text += chunk; });
+      response.on("error", reject);
+      response.on("end", () => {
+        try {
+          resolve({ status: response.statusCode, data: text ? JSON.parse(text) : null });
+        } catch (error) {
+          reject(error);
+        }
+      });
     });
-    const text = await response.text();
-    return { status: response.status, data: text ? JSON.parse(text) : null };
-  };
+    request.on("error", reject);
+    if (body !== undefined) request.write(JSON.stringify(body));
+    request.end();
+  });
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

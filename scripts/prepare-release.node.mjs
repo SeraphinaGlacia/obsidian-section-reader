@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import test from "node:test";
 import { createGitHubRequest, prepareRelease, releaseVersion } from "./prepare-release.mjs";
 
@@ -184,16 +185,27 @@ test("retains the tag and reports an unconfirmed dispatch without retrying", asy
   assert.equal(f.writes().length, 2);
 });
 
-test("HTTP adapter uses fixed GitHub origin and refuses redirects", async () => {
+test("HTTPS adapter uses fixed GitHub origin without redirect handling", async () => {
   const calls = [];
-  const request = createGitHubRequest("test-token", async (...args) => {
-    calls.push(args);
-    return { status: 204, text: async () => "" };
+  const request = createGitHubRequest("test-token", (url, options, callback) => {
+    const req = new EventEmitter();
+    const call = { url, options, body: "" };
+    calls.push(call);
+    req.write = (chunk) => { call.body += chunk; };
+    req.end = () => {
+      const response = new EventEmitter();
+      response.statusCode = 302;
+      response.setEncoding = () => {};
+      callback(response);
+      response.emit("end");
+    };
+    return req;
   });
-  assert.deepEqual(await request("POST", `${prefix}/actions/workflows/release.yml/dispatches`, { ref: version }), { status: 204, data: null });
-  assert.equal(calls[0][0], `https://api.github.com/${prefix}/actions/workflows/release.yml/dispatches`);
-  assert.equal(calls[0][1].redirect, "error");
-  assert.equal(calls[0][1].body, JSON.stringify({ ref: version }));
+  assert.deepEqual(await request("POST", `${prefix}/actions/workflows/release.yml/dispatches`, { ref: version }), { status: 302, data: null });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url.href, `https://api.github.com/${prefix}/actions/workflows/release.yml/dispatches`);
+  assert.equal(calls[0].options.headers["User-Agent"], "section-reader-release-preparation");
+  assert.equal(calls[0].body, JSON.stringify({ ref: version }));
 });
 
 test("does not mistake a successful same-named branch run for a tag release", async () => {
