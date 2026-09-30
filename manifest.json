@@ -1,9 +1,9 @@
 {
   "id": "focus-cards",
-  "name": "Focus Cards",
+  "name": "Section Reader",
   "version": "0.1.2",
   "minAppVersion": "1.8.7",
-  "description": "通过分割线将单篇长文档切分成类似 PPT、卡片的交互形式，极大提升阅读体验。",
+  "description": "Read long notes one section at a time using root-level horizontal rules, with native Markdown rendering, navigation, and saved reading progress.",
   "author": "SeraphinaGlacia",
   "authorUrl": "https://github.com/SeraphinaGlacia",
   "isDesktopOnly": false
