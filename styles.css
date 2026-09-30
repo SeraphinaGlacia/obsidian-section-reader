@@ -1,7 +1,7 @@
-.focus-cards-view {
+.workspace-leaf-content > .view-content.focus-cards-view {
   position: relative;
-  overflow: hidden !important;
-  padding: 0 !important;
+  overflow: hidden;
+  padding: 0;
   background: var(--background-primary);
   color: var(--text-normal);
 }
@@ -26,6 +26,7 @@
   width: 100%;
   height: 100%;
   transition-property: transform;
+  transition-duration: var(--focus-cards-transition-duration, 0ms);
   transition-timing-function: cubic-bezier(0.22, 0.8, 0.3, 1);
   will-change: transform;
 }
@@ -57,10 +58,10 @@
   );
 }
 
-.focus-cards-view .focus-cards-card .metadata-container,
-.focus-cards-view .focus-cards-card .frontmatter,
-.focus-cards-view .focus-cards-card [data-focus-cards-marker] {
-  display: none !important;
+.focus-cards-view .focus-cards-card-content .metadata-container,
+.focus-cards-view .focus-cards-card-content .frontmatter,
+.focus-cards-view .focus-cards-card-content [data-focus-cards-marker] {
+  display: none;
 }
 
 .focus-cards-view .focus-cards-card pre,
@@ -103,6 +104,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .focus-cards-view .focus-cards-track {
-    transition-duration: 0ms !important;
+    transition-duration: 0ms;
   }
 }

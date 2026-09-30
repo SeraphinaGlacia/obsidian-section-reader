@@ -32,17 +32,17 @@
   "homepage": "https://github.com/SeraphinaGlacia/obsidian-section-reader#readme",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@types/jsdom": "^21.1.7",
+    "@types/jsdom": "^28.0.3",
     "@types/node": "^26.2.0",
     "esbuild": "^0.28.2",
     "eslint": "^9.39.4",
     "eslint-plugin-obsidianmd": "^0.4.1",
     "globals": "^17.11.0",
-    "jsdom": "^26.1.0",
+    "jsdom": "^28.1.0",
     "obsidian": "^1.13.1",
     "obsidian-min": "npm:obsidian@1.8.7",
     "typescript": "^5.9.3",

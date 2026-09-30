@@ -105,7 +105,7 @@ describe("FocusCardsView navigation", () => {
     await view.setState({ file: file.path }, { history: false });
     view.setEphemeralState({ line: 18 });
     expect(index(view)).toBe(2);
-    expect(track(view).style.transitionDuration).toBe("120ms");
+    expect(track(view).style.getPropertyValue("--focus-cards-transition-duration")).toBe("120ms");
     expect(track(view).firstElementChild).toBe(firstCard);
     expect(app.vault.cachedRead).toHaveBeenCalledTimes(1);
     expect(MarkdownRenderer.render).toHaveBeenCalledTimes(1);
@@ -124,7 +124,7 @@ describe("FocusCardsView navigation", () => {
     expect(progress.get(file.path)?.index).toBe(1);
     expect(view.contentEl.querySelectorAll('[aria-hidden="false"]')).toHaveLength(1);
     view.nextCard();
-    expect(track(view).style.transitionDuration).toBe("220ms");
+    expect(track(view).style.getPropertyValue("--focus-cards-transition-duration")).toBe("220ms");
   });
 
   it("scrolls to the selected occurrence of a repeated heading within the card", async () => {
@@ -204,9 +204,9 @@ describe("FocusCardsView navigation", () => {
     const { view } = setup();
     await open(view);
     view.setEphemeralState({ line: 18 });
-    expect(track(view).style.transitionDuration).toBe("0ms");
+    expect(track(view).style.getPropertyValue("--focus-cards-transition-duration")).toBe("0ms");
     view.previousCard();
-    expect(track(view).style.transitionDuration).toBe("0ms");
+    expect(track(view).style.getPropertyValue("--focus-cards-transition-duration")).toBe("0ms");
   });
 
   it("keeps note progress separate when the same leaf changes files and returns", async () => {

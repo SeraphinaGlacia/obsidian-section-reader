@@ -20,6 +20,13 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports" }],
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
+      "obsidianmd/prefer-create-el": "error",
+    },
+  },
+  {
+    files: ["tests/**/*.ts"],
+    rules: {
+      // Test fixtures implement the host DOM helpers using browser primitives.
       "obsidianmd/prefer-create-el": "off",
     },
   },

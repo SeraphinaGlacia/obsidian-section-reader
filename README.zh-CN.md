@@ -55,7 +55,7 @@ Section Reader 是一款 Obsidian 长笔记阅读插件：把根层级 `---` 分
 先选择一种方式获取安装文件：
 
 - **下载 Release：** 前往 [Releases](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases)，下载同一个 Section Reader 版本的 `main.js`、`manifest.json` 和 `styles.css`。
-- **从源码构建：** 下载或克隆本仓库，使用 Node.js 20 或更新版本，运行 `npm ci` 和 `npm run build`，生成上述三个文件。
+- **从源码构建：** 下载或克隆本仓库，使用 Node.js 24 或更新版本，运行 `npm ci` 和 `npm run build`，生成上述三个文件。
 
 获取文件后，完成以下步骤：
 
@@ -109,7 +109,7 @@ Total assets stay the same: equipment increases while cash decreases.
 
 ## 四、开发
 
-需要 Node.js 20 或更新版本。
+需要 Node.js 24 或更新版本。
 
 ```bash
 npm ci

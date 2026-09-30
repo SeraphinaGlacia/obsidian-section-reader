@@ -35,7 +35,7 @@ export function splitRenderedDocument(
     boundaryNodes.set(boundary, index);
   }
 
-  const rawFragments = cardDocument.segments.map(() => document.createDocumentFragment());
+  const rawFragments = cardDocument.segments.map(() => createFragment());
   let segmentIndex = 0;
   for (const node of [...root.childNodes]) {
     const boundaryIndex = boundaryNodes.get(node);

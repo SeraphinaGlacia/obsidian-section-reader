@@ -259,14 +259,14 @@ export class FocusCardsView extends FileView implements HoverParent {
     this.contentEl.classList.add("focus-cards-view");
     this.contentEl.replaceChildren();
 
-    this.shellEl = document.createElement("div");
+    this.shellEl = createDiv();
     this.shellEl.className = "focus-cards-shell";
-    this.viewportEl = document.createElement("div");
+    this.viewportEl = createDiv();
     this.viewportEl.className = "focus-cards-viewport";
     this.viewportEl.tabIndex = 0;
-    this.trackEl = document.createElement("div");
+    this.trackEl = createDiv();
     this.trackEl.className = "focus-cards-track";
-    this.counterEl = document.createElement("div");
+    this.counterEl = createDiv();
     this.counterEl.className = "focus-cards-counter";
     this.counterEl.setAttribute("role", "status");
     this.counterEl.setAttribute("aria-live", "polite");
@@ -413,7 +413,7 @@ export class FocusCardsView extends FileView implements HoverParent {
     const desiredKey = this.metadataResolved ? previousCard?.key : this.preferredKey;
     const markerPrefix = `fc-${version}-${this.markerSerial++}`;
     let renderComponent = this.addChild(new Component());
-    let staging = document.createElement("div");
+    let staging = createDiv();
     staging.className = "markdown-rendered";
 
     try {
@@ -433,7 +433,7 @@ export class FocusCardsView extends FileView implements HoverParent {
       if (fragments === null) {
         this.removeChild(renderComponent);
         renderComponent = this.addChild(new Component());
-        staging = document.createElement("div");
+        staging = createDiv();
         staging.className = "markdown-rendered";
         await MarkdownRenderer.render(this.app, source, staging, file.path, renderComponent);
         if (version !== this.renderVersion || this.file?.path !== file.path) {
@@ -441,7 +441,7 @@ export class FocusCardsView extends FileView implements HoverParent {
           return;
         }
         nextDocument = createCardDocument(source, { frontmatterEndOffset });
-        const fragment = document.createDocumentFragment();
+        const fragment = createFragment();
         fragment.append(...staging.childNodes);
         fragments = [fragment];
       }
@@ -482,15 +482,15 @@ export class FocusCardsView extends FileView implements HoverParent {
     file: TFile,
   ): HTMLElement[] {
     return cardDocument.cards.map((card, index) => {
-      const panel = document.createElement("section");
+      const panel = createEl("section");
       panel.className = "focus-cards-card markdown-preview-view reader-mode-content";
       setReadableLineWidth(panel, this.readableLineWidth);
       panel.setAttribute("role", "region");
       panel.dataset.cardKey = card.key;
 
-      const sizer = document.createElement("div");
+      const sizer = createDiv();
       sizer.className = "focus-cards-card-sizer markdown-preview-sizer";
-      const content = document.createElement("div");
+      const content = createDiv();
       content.className = "focus-cards-card-content markdown-preview-section markdown-rendered";
       const fragment = fragments[index];
       if (fragment !== undefined) content.append(fragment);
@@ -568,7 +568,7 @@ export class FocusCardsView extends FileView implements HoverParent {
   private applyTransform(duration: number): void {
     if (this.trackEl === null) return;
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    this.trackEl.style.transitionDuration = `${reducedMotion ? 0 : duration}ms`;
+    this.trackEl.style.setProperty("--focus-cards-transition-duration", `${reducedMotion ? 0 : duration}ms`);
     this.trackEl.style.transform = `translate3d(${-this.currentIndex * 100}%, 0, 0)`;
   }
 
@@ -674,7 +674,7 @@ export class FocusCardsView extends FileView implements HoverParent {
     if (this.trackEl === null) return;
     this.renderComponents.clear();
     const message = error instanceof Error ? error.message : String(error);
-    const panel = document.createElement("section");
+    const panel = createEl("section");
     panel.className = "focus-cards-card focus-cards-error";
     panel.textContent = `${this.plugin.text.viewName}: ${message}`;
     this.trackEl.replaceChildren(panel);

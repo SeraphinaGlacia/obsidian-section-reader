@@ -55,7 +55,7 @@ Press **Ctrl + Alt + U** → switch to reading one section at a time → use **�
 First, choose one way to obtain the installation files:
 
 - **Download a release:** Go to [Releases](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases) and download `main.js`, `manifest.json`, and `styles.css` from the same Section Reader version.
-- **Build from source:** Download or clone this repository. With Node.js 20 or later, run `npm ci` and `npm run build` to generate those three files.
+- **Build from source:** Download or clone this repository. With Node.js 24 or later, run `npm ci` and `npm run build` to generate those three files.
 
 Once you have the files, complete these steps:
 
@@ -109,7 +109,7 @@ Total assets stay the same: equipment increases while cash decreases.
 
 ## 4. Development
 
-Requires Node.js 20 or later.
+Requires Node.js 24 or later.
 
 ```bash
 npm ci
