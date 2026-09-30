@@ -19,7 +19,7 @@ Requires **Obsidian 1.8.7 or later**. Supports desktop and mobile.
 ## Quick start
 
 1. Open a Markdown note with a standalone `---` line between sections. Leave a blank line on either side so it is parsed as a horizontal rule.
-2. Click **Toggle Focus Cards** in the ribbon, or run **Section Reader: Toggle card browsing mode** from the command palette.
+2. Click **Toggle Section Reader** in the ribbon, or run **Section Reader: Toggle card browsing mode** from the command palette.
 3. Use the left and right arrow keys on desktop. On mobile, double-tap the left edge for the previous card or the right edge for the next card.
 4. Run the toggle command again, or press `Esc`, to return to the original Markdown view.
 
@@ -59,7 +59,7 @@ When you enter focus mode from the editor, the card containing your cursor opens
 | Next card | `next-card` |
 | Previous card | `previous-card` |
 
-The ribbon tooltip still reads **Toggle Focus Cards**. The internal plugin ID remains `focus-cards`, so the installation folder is unchanged.
+The internal plugin ID remains `focus-cards`, so the installation folder is unchanged.
 
 No global hotkeys are assigned by default. Assign your own under **Settings → Hotkeys**.
 
