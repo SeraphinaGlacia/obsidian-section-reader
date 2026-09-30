@@ -18,7 +18,9 @@ The current and minimum Obsidian API packages still depend on Moment 2.29.4. The
 
 ## Official checks
 
-The local composite action runs the unmodified bundle from [obsidianmd/obsidian-workflows](https://github.com/obsidianmd/obsidian-workflows) at commit `8167caed39664214d82c86fdfa32e06d8d55f61d` (v1.2.3). It uses `mode: pr`, `scanner-lint: true`, and `strict: true`. The upstream checkout is moved outside the project before scanning.
+The local composite action runs the bundle from [obsidianmd/obsidian-workflows](https://github.com/obsidianmd/obsidian-workflows) at commit `8167caed39664214d82c86fdfa32e06d8d55f61d` (v1.2.3), with the dependency-only patch in `scripts/patches/obsidian-scanner-moment.patch`. It uses `mode: pr`, `scanner-lint: true`, and `strict: true`. The upstream checkout is moved outside the project before scanning.
+
+Before applying the patch, `scripts/patch-obsidian-scanner.mjs` verifies the original bundle's SHA-256. An upstream change or a previously patched bundle fails this check. The patch adds a Moment 2.31.0 override to the temporary scanner package and runs `npm audit --audit-level=low` after installation. Installation or audit failures make the scanner inconclusive, which the report gate rejects. The official rule definitions, severities, and configuration are unchanged. Bootstrap regression tests execute the actual patched function and cover successful installation, installation failure, and audit failure.
 
 This runs upstream manifest, README/license, repository, dependency-policy, build, artifact-preflight, scanner ESLint, and scanner Stylelint checks. The scanners use the official configuration, independently of the project's ESLint configuration. No official findings are suppressed.
 
@@ -30,7 +32,7 @@ CI retains `contents: read`; tag releases retain `contents: write`. The official
 
 As of 2026-09-30, npm marks ESLint 9 as deprecated. The official Obsidian lint plugin depends on plugins whose declared peer ranges do not yet support ESLint 10, including `eslint-plugin-import`. This project retains the compatible ESLint 9 toolchain instead of overriding those peer requirements.
 
-The pinned official action installs a separate scanner dependency tree using ESLint 9.37.0 and `eslint-plugin-obsidianmd` 0.4.1. Its audit reports one moderate Moment vulnerability against three affected packages: `moment`, `obsidian`, and `eslint-plugin-obsidianmd`. The project's Moment override does not apply to that isolated installation. Reproducing that dependency tree with a `moment: 2.31.0` override clears all three audit entries. Applying this to the official scanner requires an upstream update or a separately maintained dependency patch; this integration keeps the official bundle unchanged and its npm output visible. The official action is at its latest release, v1.2.3, as of 2026-09-30.
+The pinned official action installs a separate scanner dependency tree using ESLint 9.37.0 and `eslint-plugin-obsidianmd` 0.4.1. Without the patch, its audit reports one moderate Moment vulnerability against three affected packages: `moment`, `obsidian`, and `eslint-plugin-obsidianmd`. The project's Moment override does not apply to that isolated installation. The scanner bootstrap patch now supplies its own `moment: 2.31.0` override, clearing all three audit entries, and rejects any new audit findings. npm output, including the remaining ESLint 9 deprecation notice, stays visible. Remove this patch once the official action provides a compatible fix; review the bundle hash, patch, bootstrap tests, and report gate together when updating upstream. The official action is at its latest release, v1.2.3, as of 2026-09-30.
 
 ## Packaging and release
 

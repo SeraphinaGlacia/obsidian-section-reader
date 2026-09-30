@@ -1,0 +1,28 @@
+diff --git a/dist/index.js b/dist/index.js
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -65470,7 +65470,8 @@ async function createScannerDepsDir(deps) {
+     const pkg = {
+         name: 'obsidian-scanner-lint',
+         private: true,
+-        dependencies: deps
++        dependencies: deps,
++        overrides: { moment: '2.31.0' }
+     };
+     fs$1.writeFileSync(path$2.join(tempDir, 'package.json'), JSON.stringify(pkg));
+     const exitCode = await exec('npm', ['install'], {
+@@ -65481,6 +65482,14 @@ async function createScannerDepsDir(deps) {
+         fs$1.rmSync(tempDir, { recursive: true, force: true });
+         throw new Error('Failed to install scanner lint dependencies.');
+     }
++    const auditExitCode = await exec('npm', ['audit', '--audit-level=low'], {
++        cwd: tempDir,
++        ignoreReturnCode: true
++    });
++    if (auditExitCode !== 0) {
++        fs$1.rmSync(tempDir, { recursive: true, force: true });
++        throw new Error('Scanner lint dependency audit failed.');
++    }
+     return tempDir;
+ }
+ async function runUserLint(workspacePath) {

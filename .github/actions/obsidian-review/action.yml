@@ -1,5 +1,5 @@
 name: Strict official Obsidian review
-description: Run the pinned official checks and reject incomplete scanner results.
+description: Run the pinned official rules with audited scanner dependencies and reject incomplete results.
 inputs:
   github-token:
     description: Existing workflow token, used only for read-only repository checks.
@@ -28,5 +28,7 @@ runs:
         set -euo pipefail
         tool_dir="$(mktemp -d "$RUNNER_TEMP/obsidian-review.XXXXXX")"
         mv scripts/.obsidian-review-action "$tool_dir/action"
+        node scripts/patch-obsidian-scanner.mjs "$tool_dir/action"
+        OBSIDIAN_SCANNER_BUNDLE="$tool_dir/action/dist/index.js" node --test scripts/scanner-bootstrap.node.mjs
         node "$tool_dir/action/dist/index.js"
         node scripts/verify-obsidian-review.mjs "$GITHUB_STEP_SUMMARY"
