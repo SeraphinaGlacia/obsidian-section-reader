@@ -123,6 +123,8 @@ export async function prepareRelease({ context, metadata, request }) {
   return { version, sha: context.sha, dispatched: true, runId: dispatched.data?.workflow_run_id };
 }
 
+// This CI-only script runs in Node, outside the Obsidian plugin runtime.
+// eslint-disable-next-line no-restricted-globals
 export function createGitHubRequest(token, fetchImpl = fetch) {
   if (!token) throw new Error("GH_TOKEN is required");
   return async (method, path, body) => {
