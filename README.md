@@ -86,7 +86,7 @@ The 0.1 series does not include note editing beyond task-checkbox interactions, 
 
 ### Manual installation
 
-1. From a [GitHub release](https://github.com/SeraphinaGlacia/obsidian-focus-cards/releases), download `main.js`, `manifest.json`, and `styles.css`.
+1. From a [GitHub release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases), download `main.js`, `manifest.json`, and `styles.css`.
 2. Put all three files in `<vault>/.obsidian/plugins/focus-cards/` (or the equivalent directory if your vault uses a custom configuration folder).
 3. Reload Obsidian and enable **Section Reader** under **Settings → Community plugins**.
 
