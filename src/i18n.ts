@@ -1,15 +1,15 @@
 const translations = {
   en: {
-    viewName: "Focus Cards",
-    ribbon: "Toggle Focus Cards",
+    viewName: "Section Reader",
+    ribbon: "Toggle Section Reader",
     toggle: "Toggle card browsing mode",
     next: "Next card",
     previous: "Previous card",
     cardLabel: (current: number, total: number): string => `Card ${current} of ${total}`,
   },
   zh: {
-    viewName: "专注卡片",
-    ribbon: "切换专注卡片",
+    viewName: "Section Reader",
+    ribbon: "切换 Section Reader",
     toggle: "切换卡片浏览模式",
     next: "下一张卡片",
     previous: "上一张卡片",
