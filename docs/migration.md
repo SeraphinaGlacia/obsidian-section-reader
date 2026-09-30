@@ -15,6 +15,13 @@ Changing the manifest ID is a new plugin identity to Obsidian. There is no autom
 
 If you need to roll back, disable Section Reader, quit Obsidian, restore the old installation and its backup, then re-enable Focus Cards. Do not remove either backup while validating the migration.
 
-This is a migration procedure, not a claim that native desktop or mobile migration has already been tested. Release preparation must include a disposable-vault test before publishing the new identity. If the old ID has been listed in the official directory, coordinate the identifier change with Obsidian first; directory identifiers cannot be changed by editing the manifest alone.
+## Bounded desktop verification
+
+On 2026-09-30, a disposable synthetic vault was tested in Obsidian 1.13.7 for Linux. The old-ID build from commit `41343cf` (manifest `focus-cards`) saved the third card as index `2`. With Obsidian closed, the configuration was backed up, its `data.json` was copied byte-for-byte to the candidate 0.2.0 `section-reader` installation, and only the new identity was enabled. After restart, the new toggle command reopened the expected third card, **Bring it together**. The synthetic Markdown note remained byte-identical.
+
+The old `focus-cards:toggle-card-view` hotkey no longer toggled the reader; a deliberately reassigned `section-reader:toggle-card-view` binding did. Neither identity was enabled alongside the other.
+
+This verifies the old-ID build-to-candidate migration, not a migration from downloaded release assets. The old-ID build already contained the Section Reader display name. Physical mobile devices, other desktop platforms, and Obsidian 1.8.7 were not tested in this migration check. If the old ID has been listed in the official directory, coordinate the identifier change with Obsidian first; directory identifiers cannot be changed by editing the manifest alone.
+
 
 Reference: [Obsidian directory identifier guidance](https://docs.obsidian.md/community-directory/faq).
