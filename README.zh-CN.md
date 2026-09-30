@@ -4,7 +4,7 @@
 
 Section Reader 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它把当前 Markdown 笔记中独立成行的 `---` 视为卡片边界，一次只展示一个知识点。浏览本身不会修改 Markdown；主动勾选或取消任务复选框时，会更新对应的 Markdown 标记。
 
-需要 **Obsidian 1.8.7 或更新版本**，支持桌面端与移动端。
+需要 **Obsidian 1.8.7 或更新版本**，面向桌面端与移动端。移动交互已在模拟器中检查，尚未完成实体 iOS 和 Android 设备验证。
 
 ## 使用
 
@@ -65,13 +65,15 @@ Section Reader 是一款面向 Obsidian 长笔记复习的卡片浏览插件。�
 
 ## 安装
 
-社区插件目录安装方式仅在正式上架后可用；此处不表示当前已上架或已有可下载的发布版本。手动安装时，将 [GitHub Release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases) 中的 `main.js`、`manifest.json` 和 `styles.css` 放入：
+社区插件目录安装方式仅在正式上架后可用。手动安装时，将 [GitHub Release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases) 中的 `main.js`、`manifest.json` 和 `styles.css` 放入：
 
 ```text
 <vault>/.obsidian/plugins/focus-cards/
 ```
 
-如果库使用自定义配置文件夹，请使用相应目录。复制文件后，重新加载 Obsidian，并在“设置 → 第三方插件”中启用 **Section Reader**。
+如果库使用自定义配置文件夹，请使用相应目录。复制文件后，重新加载 Obsidian，并在“设置 → 第三方插件”中启用插件。
+
+最新已发布版本 **0.1.2** 仍使用 **Focus Cards** 名称，安装该版本的附件后请启用 **Focus Cards**。本分支中的 **Section Reader** 品牌名称将用于下一个发布版本。
 
 ## 阅读进度数据
 
