@@ -1,8 +1,8 @@
-# Focus Cards
+# Section Reader
 
 [English](README.md)
 
-Focus Cards 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它把当前 Markdown 笔记中独立成行的 `---` 视为卡片边界，一次只展示一个知识点。浏览本身不会修改 Markdown；主动勾选或取消任务复选框时，会更新对应的 Markdown 标记。
+Section Reader 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它把当前 Markdown 笔记中独立成行的 `---` 视为卡片边界，一次只展示一个知识点。浏览本身不会修改 Markdown；主动勾选或取消任务复选框时，会更新对应的 Markdown 标记。
 
 需要 **Obsidian 1.8.7 或更新版本**，支持桌面端与移动端。
 
@@ -31,7 +31,7 @@ Focus Cards 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它�
 - 专注模式跟随当前标签页保持：点击大纲、在标题间跳转、切换标签页，或打开其他笔记链接再返回，都不会自动退出。关闭该标签页后，再次打开笔记会使用普通 Markdown 视图；阅读进度仍会保留。
 - 大纲与当前笔记的标题、块链接直接定位到目标卡片，跨卡片跳转使用约 120 毫秒的快速翻页过渡；开启系统“减少动态效果”时不播放动画。
 - 桌面端使用左右方向键翻卡；移动端双击屏幕左侧边缘返回上一张，双击右侧边缘进入下一张。横向滑动仍由 Obsidian 用于打开左右侧边栏。
-- 插件不设默认全局快捷键，可在“设置 → 快捷键”中为 Focus Cards 命令绑定。
+- 插件不设默认全局快捷键，可在“设置 → 快捷键”中为 Section Reader 命令绑定。
 - 手机端可在 Obsidian 的移动工具栏或 Quick Action 中固定切换命令。
 
 ## 命令
@@ -42,7 +42,7 @@ Focus Cards 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它�
 | 下一张卡片 | `next-card` |
 | 上一张卡片 | `previous-card` |
 
-三个命令均不设置默认快捷键。
+三个命令均不设置默认快捷键。内部插件 ID 仍为 `focus-cards`，安装文件夹保持不变；Ribbon 提示文字仍为“切换专注卡片”（英文界面为“Toggle Focus Cards”）。
 
 ## 界面语言
 
@@ -75,7 +75,7 @@ Focus Cards 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它�
 <vault>/.obsidian/plugins/focus-cards/
 ```
 
-如果库使用自定义配置文件夹，请使用相应目录。复制文件后，重新加载 Obsidian，并在“设置 → 第三方插件”中启用 **Focus Cards**。
+如果库使用自定义配置文件夹，请使用相应目录。复制文件后，重新加载 Obsidian，并在“设置 → 第三方插件”中启用 **Section Reader**。
 
 ## 阅读进度数据
 
