@@ -1,0 +1,32 @@
+name: Strict official Obsidian review
+description: Run the pinned official checks and reject incomplete scanner results.
+inputs:
+  github-token:
+    description: Existing workflow token, used only for read-only repository checks.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Obtain pinned official Obsidian checks
+      uses: actions/checkout@v4
+      with:
+        repository: obsidianmd/obsidian-workflows
+        # Official v1 signed tag, action version 1.2.3 (2026-09-22).
+        ref: 8167caed39664214d82c86fdfa32e06d8d55f61d
+        path: scripts/.obsidian-review-action
+        persist-credentials: false
+    - name: Run official scanner and fail-closed gate
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_TYPE: plugin
+        INPUT_MODE: pr
+        INPUT_SCANNER-LINT: "true"
+        INPUT_STRICT: "true"
+        INPUT_NODE-VERSION: "24"
+      run: |
+        set -euo pipefail
+        tool_dir="$(mktemp -d "$RUNNER_TEMP/obsidian-review.XXXXXX")"
+        mv scripts/.obsidian-review-action "$tool_dir/action"
+        node "$tool_dir/action/dist/index.js"
+        node scripts/verify-obsidian-review.mjs "$GITHUB_STEP_SUMMARY"

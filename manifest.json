@@ -1,9 +1,9 @@
 {
-  "id": "focus-cards",
+  "id": "section-reader",
   "name": "Section Reader",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "minAppVersion": "1.8.7",
-  "description": "Read long notes one section at a time using root-level horizontal rules, with native Markdown rendering, navigation, and saved reading progress.",
+  "description": "Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.",
   "author": "SeraphinaGlacia",
   "authorUrl": "https://github.com/SeraphinaGlacia",
   "isDesktopOnly": false
