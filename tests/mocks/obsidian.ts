@@ -64,7 +64,7 @@ export class Scope {
   register(): void { /* Key bindings are exercised in the native vault. */ }
 }
 
-export const Platform = { isMobileApp: false };
+export const Platform = { isMobile: false, isMobileApp: false };
 export const getFrontMatterInfo = (): { exists: boolean; contentStart: number } => ({
   exists: false, contentStart: 0,
 });

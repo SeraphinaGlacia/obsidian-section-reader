@@ -575,7 +575,7 @@ export class FocusCardsView extends FileView implements HoverParent {
   private registerMobileEdgeDoubleTap(viewport: HTMLElement): void {
     this.registerDomEvent(viewport, "pointerdown", (event) => {
       if (
-        !Platform.isMobileApp ||
+        !Platform.isMobile ||
         !event.isPrimary ||
         event.pointerType === "mouse" ||
         isInteractiveTarget(event.target) ||
@@ -595,7 +595,7 @@ export class FocusCardsView extends FileView implements HoverParent {
     });
 
     this.registerDomEvent(viewport, "pointermove", (event) => {
-      if (!Platform.isMobileApp || event.pointerType === "mouse") return;
+      if (!Platform.isMobile || event.pointerType === "mouse") return;
       if (hasActiveTextSelection()) {
         this.edgeDoubleTap.reset();
         return;
@@ -604,7 +604,7 @@ export class FocusCardsView extends FileView implements HoverParent {
     });
 
     this.registerDomEvent(viewport, "pointerup", (event) => {
-      if (!Platform.isMobileApp || event.pointerType === "mouse") return;
+      if (!Platform.isMobile || event.pointerType === "mouse") return;
       if (hasActiveTextSelection()) {
         this.edgeDoubleTap.reset();
         return;
@@ -624,12 +624,12 @@ export class FocusCardsView extends FileView implements HoverParent {
     });
 
     this.registerDomEvent(viewport, "pointercancel", (event) => {
-      if (!Platform.isMobileApp || event.pointerType === "mouse") return;
+      if (!Platform.isMobile || event.pointerType === "mouse") return;
       this.edgeDoubleTap.cancel(event.pointerId);
     });
 
     this.registerDomEvent(viewport, "dblclick", (event) => {
-      if (!Platform.isMobileApp || isInteractiveTarget(event.target)) return;
+      if (!Platform.isMobile || isInteractiveTarget(event.target)) return;
       const bounds = viewport.getBoundingClientRect();
       if (edgeTapSideForPosition(event.clientX, bounds.left, bounds.width) !== 0) {
         event.preventDefault();
@@ -638,6 +638,7 @@ export class FocusCardsView extends FileView implements HoverParent {
   }
 
   private handleTrackClick(event: MouseEvent): void {
+    if (this.handleFootnoteClick(event)) return;
     const anchor = internalLinkFromEvent(event);
     if (anchor === null || !this.file) return;
     const link = internalLinkText(anchor);
@@ -653,6 +654,37 @@ export class FocusCardsView extends FileView implements HoverParent {
       return;
     }
     void this.app.workspace.openLinkText(link, this.file.path, "tab");
+  }
+
+  private handleFootnoteClick(event: MouseEvent): boolean {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ||
+      !(event.target instanceof Element) || this.trackEl === null) return false;
+    const anchor = event.target.closest("a.footnote-link");
+    const href = anchor?.getAttribute("href");
+    if (href === undefined || href === null || !href.startsWith("#")) return false;
+
+    let id: string;
+    try {
+      id = decodeURIComponent(href.slice(1));
+    } catch {
+      return false;
+    }
+    // Scope IDs to this render: another open note can use the same footnote IDs.
+    const target = [...this.trackEl.querySelectorAll<HTMLElement>("[id]")]
+      .find((element) => element.id === id);
+    if (target === undefined) return false;
+    const index = this.cardElements.findIndex((card) => card.contains(target));
+    const panel = this.cardElements[index];
+    if (panel === undefined) return false;
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.pendingNavigation = null;
+    this.selectCard(index, CARD_JUMP_ANIMATION_MS);
+    panel.scrollTop += target.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    this.scrollPositions.set(cardScrollKey(this.cardDocument, index), panel.scrollTop);
+    panel.focus({ preventScroll: true });
+    return true;
   }
 
   private handleTrackHover(event: MouseEvent): void {

@@ -30,18 +30,18 @@ CI retains `contents: read`; tag releases retain `contents: write`. The official
 
 As of 2026-09-30, npm marks ESLint 9 as deprecated. The official Obsidian lint plugin depends on plugins whose declared peer ranges do not yet support ESLint 10, including `eslint-plugin-import`. This project retains the compatible ESLint 9 toolchain instead of overriding those peer requirements.
 
-The pinned official action installs a separate scanner dependency tree using ESLint 9.37.0 and `eslint-plugin-obsidianmd` 0.4.1. Its install reports three moderate Moment-chain advisories. The project's Moment override does not apply to that isolated installation. The official action is already at its latest release, v1.2.3; this integration does not rewrite its scanner dependencies or hide its npm output. These notices are separate from this project's `npm audit` result and require an upstream-compatible toolchain update.
+The pinned official action installs a separate scanner dependency tree using ESLint 9.37.0 and `eslint-plugin-obsidianmd` 0.4.1. Its audit reports one moderate Moment vulnerability against three affected packages: `moment`, `obsidian`, and `eslint-plugin-obsidianmd`. The project's Moment override does not apply to that isolated installation. Reproducing that dependency tree with a `moment: 2.31.0` override clears all three audit entries. Applying this to the official scanner requires an upstream update or a separately maintained dependency patch; this integration keeps the official bundle unchanged and its npm output visible. The official action is at its latest release, v1.2.3, as of 2026-09-30.
 
 ## Packaging and release
 
 `npm run check:package` checks the plugin identity, matching package/lockfile/manifest versions and descriptions, the compatibility mapping, and non-empty `main.js`, `manifest.json`, and `styles.css` assets. When `RELEASE_TAG` is set, it must exactly match the manifest version, without a `v` prefix.
 
-The repository prepares **Section Reader 0.2.0**, which has not been tagged or released. Published 0.1.2 assets use the older Focus Cards identity; do not reuse that tag. Push the validated `0.2.0` tag only when releasing is authorized. The tag workflow uploads all three assets after the checks pass.
+**Section Reader 0.2.0** uses the plugin ID `section-reader`. Historical 0.1.2 assets use the older Focus Cards identity; do not reuse that tag. Push a validated version tag only when releasing is authorized. The tag workflow uploads all three assets after the checks pass.
 
 ## Limits and remaining acceptance
 
 Passing CI does not guarantee community directory approval. The official action provides partial parity: published-release/build verification, private heuristics, and some behavioral/network checks remain with the authoritative directory review. This workflow does not run the directory's entire release service offline.
 
-Before publication, validate installation and navigation in a disposable Obsidian vault and on supported physical mobile devices. Existing Focus Cards users need a separate installation and reading-progress migration check for the new plugin ID. Never enable both plugin identities together. Browser-level CSS checks and mocked host tests do not replace native Obsidian acceptance.
+The [0.2.0 acceptance record](release-acceptance-0.2.0.md) covers a disposable vault in native Obsidian on macOS and its mobile UI emulation. Physical iOS/Android devices and old Focus Cards reading-progress migration were not tested. The new plugin ID installs separately from Focus Cards; do not enable both identities together. Browser-level CSS checks and mocked host tests do not replace native Obsidian acceptance.
 
 Sources: [official action inputs](https://github.com/obsidianmd/obsidian-workflows/blob/8167caed39664214d82c86fdfa32e06d8d55f61d/action.yml), [official scanner dependencies](https://github.com/obsidianmd/obsidian-workflows/blob/8167caed39664214d82c86fdfa32e06d8d55f61d/src/lint.ts), [directory FAQ](https://docs.obsidian.md/community-directory/faq).

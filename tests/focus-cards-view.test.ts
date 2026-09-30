@@ -80,6 +80,7 @@ function track(view: TestView): HTMLElement {
 
 beforeEach(() => {
   MarkdownRenderer.render.mockReset().mockImplementation(renderMarkdown);
+  Platform.isMobile = false;
   Platform.isMobileApp = false;
 });
 
@@ -91,6 +92,7 @@ afterEach(() => {
 describe("FocusCardsView navigation", () => {
   it.each([false, true])("keeps the view and DOM during outline jumps (mobile=%s)", async (mobile) => {
     Platform.isMobileApp = mobile;
+    Platform.isMobile = mobile;
     const { view, app } = setup();
     const returnView: ReturnViewSnapshot = {
       viewState: { type: "markdown", state: { file: file.path, mode: "preview" } },
@@ -174,6 +176,46 @@ describe("FocusCardsView navigation", () => {
     expect(index(view)).toBe(1);
   });
 
+  it("follows native footnotes across cards and returns to the reference in the same view", async () => {
+    const { view, app } = setup();
+    await open(view);
+    const first = track(view).children[0] as HTMLElement;
+    const last = track(view).children[2] as HTMLElement;
+    const reference = document.createElement("a");
+    reference.className = "footnote-link";
+    reference.id = "fnref-1";
+    reference.setAttribute("href", "#fn-1");
+    const label = document.createElement("span");
+    label.textContent = "[1]";
+    reference.append(label);
+    first.append(reference);
+
+    const footnote = document.createElement("li");
+    footnote.id = "fn-1";
+    const back = document.createElement("a");
+    back.className = "footnote-backref footnote-link";
+    back.setAttribute("href", "#fnref-1");
+    footnote.append(back);
+    last.append(footnote);
+    const otherViewFootnote = document.createElement("li");
+    otherViewFootnote.id = footnote.id;
+    document.body.prepend(otherViewFootnote);
+    vi.spyOn(last, "getBoundingClientRect").mockReturnValue({ top: 100 } as DOMRect);
+    vi.spyOn(footnote, "getBoundingClientRect").mockReturnValue({ top: 700 } as DOMRect);
+
+    label.click();
+    expect(index(view)).toBe(2);
+    expect(last.scrollTop).toBe(600);
+    expect(last.getAttribute("aria-hidden")).toBe("false");
+    expect(document.activeElement).toBe(last);
+    expect(view.contentEl.querySelector(".focus-cards-viewport")?.scrollLeft).toBe(0);
+    back.click();
+    expect(index(view)).toBe(0);
+    expect(document.activeElement).toBe(first);
+    expect(app.workspace.openLinkText).not.toHaveBeenCalled();
+    expect(MarkdownRenderer.render).toHaveBeenCalledTimes(1);
+  });
+
   it("waits for metadata and uses only the latest pending jump", async () => {
     const { view, caches } = setup(null);
     await open(view);
@@ -207,6 +249,36 @@ describe("FocusCardsView navigation", () => {
     expect(track(view).style.getPropertyValue("--focus-cards-transition-duration")).toBe("0ms");
     view.previousCard();
     expect(track(view).style.getPropertyValue("--focus-cards-transition-duration")).toBe("0ms");
+  });
+
+  it.each([false, true])("enables touch edge navigation only in the mobile UI (mobile=%s)", async (mobile) => {
+    Platform.isMobile = mobile;
+    // Obsidian's mobile UI emulation still runs in the desktop application.
+    Platform.isMobileApp = false;
+    const { view } = setup();
+    await open(view);
+    const viewport = view.contentEl.querySelector<HTMLElement>(".focus-cards-viewport")!;
+    vi.spyOn(viewport, "getBoundingClientRect").mockReturnValue({ left: 0, width: 390 } as DOMRect);
+    const tap = (x: number, pointerType = "touch") => {
+      for (const type of ["pointerdown", "pointerup"]) {
+        viewport.dispatchEvent(new PointerEvent(type, {
+          bubbles: true, pointerId: 1, pointerType, isPrimary: true, clientX: x, clientY: 50,
+        }));
+      }
+    };
+    tap(380, "mouse");
+    tap(380, "mouse");
+    expect(index(view)).toBe(0);
+    tap(195);
+    tap(195);
+    expect(index(view)).toBe(0);
+    tap(380);
+    expect(index(view)).toBe(0);
+    tap(380);
+    expect(index(view)).toBe(mobile ? 1 : 0);
+    tap(10);
+    tap(10);
+    expect(index(view)).toBe(0);
   });
 
   it("keeps note progress separate when the same leaf changes files and returns", async () => {
