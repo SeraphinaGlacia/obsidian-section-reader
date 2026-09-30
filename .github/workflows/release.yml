@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -28,6 +30,30 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: npm run check:package
+      - name: Attest the three release assets
+        id: provenance
+        # actions/attest v4.2.2.
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: |
+            ${{ github.workspace }}/main.js
+            ${{ github.workspace }}/manifest.json
+            ${{ github.workspace }}/styles.css
+      - name: Verify build provenance before publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ATTESTATION_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          for asset in main.js manifest.json styles.css; do
+            gh attestation verify "$asset" \
+              --bundle "$ATTESTATION_BUNDLE" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml" \
+              --source-ref "$GITHUB_REF" \
+              --source-digest "$GITHUB_SHA" \
+              --deny-self-hosted-runners
+          done
       - name: Publish GitHub release assets
         env:
           GH_TOKEN: ${{ github.token }}

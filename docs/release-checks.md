@@ -26,7 +26,7 @@ This runs upstream manifest, README/license, repository, dependency-policy, buil
 
 The upstream `validation-passed` output only rejects errors; it can still be true when scanner setup or execution is inconclusive. `scripts/verify-obsidian-review.mjs` therefore checks the official report in the same step. Missing, malformed, non-strict, incomplete, or inconclusive reports fail. Both scanners must finish without errors. Warnings remain visible in annotations and the report. Regression fixtures cover these outcomes and reject changed report catalogs. Review the report contract and fixtures together when upgrading the pinned action.
 
-CI retains `contents: read`; tag releases retain `contents: write`. The official tool only uses the existing token for read-only repository checks in this mode. These workflows do not change repository visibility or submit the plugin to the community directory.
+CI retains `contents: read`. Tag releases additionally use `contents: write` to publish assets, `id-token: write` for GitHub's short-lived signing identity, and `attestations: write` to upload build provenance. No personal signing key is required. The official review tool only performs read-only repository checks in this mode. These workflows do not change repository visibility or submit the plugin to the community directory.
 
 ## Upstream dependency notices
 
@@ -39,6 +39,23 @@ The pinned official action installs a separate scanner dependency tree using ESL
 `npm run check:package` checks the plugin identity, matching package/lockfile/manifest versions and descriptions, the compatibility mapping, and non-empty `main.js`, `manifest.json`, and `styles.css` assets. When `RELEASE_TAG` is set, it must exactly match the manifest version, without a `v` prefix.
 
 **Section Reader 0.2.0** uses the plugin ID `section-reader`. Historical 0.1.2 assets use the older Focus Cards identity; do not reuse that tag. Push a validated version tag only when releasing is authorized. The tag workflow uploads all three assets after the checks pass.
+
+Starting with 0.2.1, the release workflow uses GitHub's pinned `actions/attest` action to generate SLSA build provenance for `main.js`, `manifest.json`, and `styles.css`. Before publication, it verifies every file against the signed bundle, the repository, this release workflow, the exact tag, and the source commit. Verification also requires a GitHub-hosted runner. A failed attestation or verification prevents publication.
+
+Users can verify downloaded release files independently:
+
+```sh
+gh release download 0.2.1 --repo SeraphinaGlacia/obsidian-section-reader --dir section-reader-0.2.1
+for asset in main.js manifest.json styles.css; do
+  gh attestation verify "section-reader-0.2.1/$asset" \
+    --repo SeraphinaGlacia/obsidian-section-reader \
+    --signer-workflow SeraphinaGlacia/obsidian-section-reader/.github/workflows/release.yml \
+    --source-ref refs/tags/0.2.1 \
+    --deny-self-hosted-runners
+done
+```
+
+An attestation establishes build origin and file identity; it does not certify that the software has no bugs. Existing 0.2.0 release files and tags remain unchanged. See [GitHub's artifact attestation documentation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations).
 
 ## Limits and remaining acceptance
 
