@@ -1,88 +1,116 @@
-# Focus Cards
+# Section Reader
 
-Focus Cards 是一款面向 Obsidian 长笔记复习的卡片浏览插件。它把当前 Markdown 笔记中独立成行的 `---` 视为卡片边界，一次只展示一个知识点。原文不会被修改。
+Read long Obsidian notes one section at a time. Section Reader turns sections separated by root-level `---` lines into a focused card view, while keeping Obsidian's native Markdown rendering, links, and task interactions.
 
-## 使用
+[简体中文](README.zh-CN.md)
+
+## What it does
+
+- Show one section at a time without splitting your note into separate files
+- Navigate with keyboard commands on desktop or edge double-taps on mobile
+- Jump to a card from the outline or a heading or block link within the same note
+- Keep reading progress for each note and remember each card's scroll position during the current browsing session
+- Preserve footnotes, reference links, embeds, and task interactions by rendering the whole note with Obsidian's native Markdown renderer
+
+Reading in card view does not rewrite your Markdown. Checking or unchecking a task does update its Markdown checkbox, just as it does in Obsidian's normal reading view.
+
+Requires **Obsidian 1.8.7 or later**. Designed for desktop and mobile. Mobile interaction has been checked in a simulator; physical iOS and Android devices have not yet been verified.
+
+## Quick start
+
+1. Open a Markdown note with a standalone `---` line between sections. Leave a blank line on either side so it is parsed as a horizontal rule.
+2. Click **Toggle Section Reader** in the ribbon, or run **Section Reader: Toggle card browsing mode** from the command palette.
+3. Use the left and right arrow keys on desktop. On mobile, double-tap the left edge for the previous card or the right edge for the next card.
+4. Run the toggle command again, or press `Esc`, to return to the original Markdown view.
 
 ```markdown
----
+## One idea
 
-### 第一个知识点
-
-内容……
+Read this section at your own pace.
 
 ---
 
-### 第二个知识点
+## The next idea
 
-内容……
-
----
+Move on when you are ready.
 ```
 
-- 点击左侧 Ribbon 中的“切换专注卡片”图标，或运行命令“切换卡片浏览模式”。再次触发该动作或按 `Esc` 返回原 Markdown 视图。
-- 专注模式跟随当前标签页保持：点击大纲、在标题间跳转、切换标签页，或打开其他笔记链接再返回，都不会自动退出。关闭该标签页后，再次打开笔记会使用普通 Markdown 视图；阅读进度仍会保留。
-- 大纲与当前笔记的标题、块链接直接定位到目标卡片，跨卡片跳转使用约 120 毫秒的快速翻页过渡；开启系统“减少动态效果”时不播放动画。
-- 桌面端使用左右方向键翻卡；移动端双击屏幕左侧边缘返回上一张，双击右侧边缘进入下一张。横向滑动仍由 Obsidian 用于打开左右侧边栏。
-- 插件不设默认全局快捷键，可在“设置 → 快捷键”中为 Focus Cards 命令绑定。
-- 手机端可在 Obsidian 的移动工具栏或 Quick Action 中固定切换命令。
+For a self-contained example, copy [the demo note](docs/demo-note.md) into your vault. It includes three sections, a same-note heading link, a footnote, and an optional task checkbox. All of its content is synthetic.
 
-## 命令
+## Navigation and reading progress
 
-| 命令 | ID |
+Focus mode stays with the current tab while you use the outline, jump between headings, switch tabs, or follow another note and return. Closing that tab ends its focus mode; reopening the note uses the normal Markdown view, while saved reading progress is retained.
+
+When you enter focus mode from the editor, the card containing your cursor opens. When you enter from reading view, the plugin uses the note's saved card position.
+
+- **Within the note:** Outline entries and heading or block links jump directly to the corresponding card. Cross-card jumps use a short transition of approximately 120 ms.
+- **Other notes:** Internal links open in a new tab in normal Markdown view, leaving the original tab in focus mode. Modifier-clicking same-note links can also open a new tab.
+- **Scrolling:** Each card scrolls vertically on its own. Its scroll position is retained when you return during the same browsing session.
+- **Layout:** Cards follow the normal Markdown view's readable line width and margins.
+- **Reduced motion:** Transitions are disabled when the system's reduced-motion preference is enabled.
+- **Mobile:** Horizontal swipes remain available to Obsidian for opening the sidebars. You can pin the toggle command to the mobile toolbar or Quick Action.
+- **Link previews:** On desktop, internal-link hover previews use Obsidian's native Page Preview events. With Hover Editor enabled, its interactive preview windows are also available in card view.
+
+### Commands
+
+| Command | ID |
 | --- | --- |
-| 切换卡片浏览模式 | `toggle-card-view` |
-| 下一张卡片 | `next-card` |
-| 上一张卡片 | `previous-card` |
+| Toggle card browsing mode | `toggle-card-view` |
+| Next card | `next-card` |
+| Previous card | `previous-card` |
 
-三个命令均不设置默认快捷键。
+The internal plugin ID remains `focus-cards`, so the installation folder is unchanged.
 
-## 界面语言
+No global hotkeys are assigned by default. Assign your own under **Settings → Hotkeys**.
 
-插件加载时读取 Obsidian 当前的界面语言：中文语言代码（`zh`、`zh-CN`、`zh-TW` 等）显示中文；英语以及其他所有语言统一显示英文。修改 Obsidian 的界面语言后，请重新加载插件或重启 Obsidian，使全部命令名称同步刷新。
+## How sections are split
 
-## 分隔规则
+A line is a card boundary only when both conditions are met:
 
-只有满足以下条件的行才会分割卡片：
+1. Its source text is exactly `---`, with no spaces or other characters.
+2. Markdown parses it as a horizontal rule at the root level.
 
-1. 该行源文字符恰好是 `---`，不含空格或其他字符。
-2. 它是 Markdown 根层级的水平分隔线。
+YAML frontmatter, fenced code, blockquotes, lists, HTML blocks, and Setext headings do not create card boundaries. Neither do `***` or `___`. Empty cards from consecutive, leading, or trailing separators are ignored.
 
-因此，YAML frontmatter、代码块、引用、列表、HTML 块、Setext 标题中的同形文本，以及 `***` / `___` 都不会分卡。连续、开头或结尾的分隔线产生的空卡片会被忽略。
+## Language
 
-## 功能边界
+The plugin reads Obsidian's interface language when it loads. Chinese language codes such as `zh`, `zh-CN`, and `zh-TW` use Chinese labels; all other languages use English labels. Reload the plugin or restart Obsidian after changing the interface language to refresh all command names.
 
-- 整篇笔记由 Obsidian 原生 Markdown 渲染器一次渲染，以保留跨卡片脚注、引用定义、链接、嵌入和任务交互的完整语境。
-- 卡片内容沿用普通 Markdown 视图的可读行宽和页边距设置，不会贴住桌面窗口两侧。
-- 每张卡片可独立纵向滚动；同一次浏览中返回时保留滚动位置。
-- 指向其他笔记的内部链接在新标签的普通 Markdown 视图打开，原标签保持专注状态。同一笔记的标题、块链接在当前卡片视图中跳转；按住修饰键点击仍可在新标签打开。
-- 桌面端双链悬停通过 Obsidian 原生 Page Preview 事件处理；启用 Hover Editor 时，可在卡片模式中弹出同样的可交互预览浮窗。
-- 浏览不会修改 Markdown；只有主动勾选任务复选框时，插件才按 Obsidian 的正常任务行为更新对应标记。
-- v0.1 不包含编辑、全屏演示、自动播放、导出、主题系统、自定义分隔符或可见翻页按钮。
+## Data and scope
 
-## 安装
+Reading progress is saved through Obsidian's plugin data storage, separately from the Markdown note. The stored entries contain the note path, card index, card key, and last-updated timestamp. Per-card scroll positions are retained for the current browsing session.
 
-社区插件目录上架后，可在 Obsidian 中直接搜索 **Focus Cards**。手动安装时，将 Release 中的 `main.js`、`manifest.json` 和 `styles.css` 放入：
+The 0.1 series does not include note editing beyond task-checkbox interactions, fullscreen presentations, autoplay, export, a theme system, custom separators, or visible next/previous buttons.
 
-```text
-<vault>/.obsidian/plugins/focus-cards/
-```
+## Installation
 
-## 开发
+### Manual installation
+
+1. From a [GitHub release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases), download `main.js`, `manifest.json`, and `styles.css`.
+2. Put all three files in `<vault>/.obsidian/plugins/focus-cards/` (or the equivalent directory if your vault uses a custom configuration folder).
+3. Reload Obsidian and enable the plugin under **Settings → Community plugins**.
+
+The latest published release, **0.1.2**, still uses the **Focus Cards** name. Enable **Focus Cards** when installing those release assets. The **Section Reader** branding in this branch is intended for the next release.
+
+Installation through Obsidian's community plugin directory becomes available only after the plugin is listed.
+
+## Development
+
+Use Node.js 20 or later.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-完整验证：
+Run the full validation suite:
 
 ```bash
 npm run check
 ```
 
-`npm run check` 依次针对当前 API 与最低支持的 Obsidian 1.8.7 API 运行 TypeScript 类型检查，再运行 ESLint、Vitest 和生产构建。
+This runs TypeScript checks against the current API and the minimum supported Obsidian 1.8.7 API, followed by ESLint, Vitest, and a production build. The existing CI workflow runs the same check for pull requests. For release builds, the existing release workflow also verifies that the version tag matches `manifest.json`.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © 2026 Xinlei Zhou
