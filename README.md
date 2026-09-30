@@ -1,6 +1,6 @@
-# Focus Cards
+# Section Reader
 
-Read long Obsidian notes one section at a time. Focus Cards turns sections separated by root-level `---` lines into a focused card view, while keeping Obsidian's native Markdown rendering, links, and task interactions.
+Read long Obsidian notes one section at a time. Section Reader turns sections separated by root-level `---` lines into a focused card view, while keeping Obsidian's native Markdown rendering, links, and task interactions.
 
 [简体中文](README.zh-CN.md)
 
@@ -19,7 +19,7 @@ Requires **Obsidian 1.8.7 or later**. Supports desktop and mobile.
 ## Quick start
 
 1. Open a Markdown note with a standalone `---` line between sections. Leave a blank line on either side so it is parsed as a horizontal rule.
-2. Click **Toggle Focus Cards** in the ribbon, or run **Focus Cards: Toggle card browsing mode** from the command palette.
+2. Click **Toggle Focus Cards** in the ribbon, or run **Section Reader: Toggle card browsing mode** from the command palette.
 3. Use the left and right arrow keys on desktop. On mobile, double-tap the left edge for the previous card or the right edge for the next card.
 4. Run the toggle command again, or press `Esc`, to return to the original Markdown view.
 
@@ -59,6 +59,8 @@ When you enter focus mode from the editor, the card containing your cursor opens
 | Next card | `next-card` |
 | Previous card | `previous-card` |
 
+The ribbon tooltip still reads **Toggle Focus Cards**. The internal plugin ID remains `focus-cards`, so the installation folder is unchanged.
+
 No global hotkeys are assigned by default. Assign your own under **Settings → Hotkeys**.
 
 ## How sections are split
@@ -86,7 +88,7 @@ The 0.1 series does not include note editing beyond task-checkbox interactions, 
 
 1. From a [GitHub release](https://github.com/SeraphinaGlacia/obsidian-focus-cards/releases), download `main.js`, `manifest.json`, and `styles.css`.
 2. Put all three files in `<vault>/.obsidian/plugins/focus-cards/` (or the equivalent directory if your vault uses a custom configuration folder).
-3. Reload Obsidian and enable **Focus Cards** under **Settings → Community plugins**.
+3. Reload Obsidian and enable **Section Reader** under **Settings → Community plugins**.
 
 The community-directory installation route becomes available only after the plugin is listed. These instructions do not imply that a listing or release is currently available.
 
