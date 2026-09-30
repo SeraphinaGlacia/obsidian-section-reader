@@ -14,7 +14,7 @@ Read long Obsidian notes one section at a time. Section Reader turns sections se
 
 Reading in card view does not rewrite your Markdown. Checking or unchecking a task does update its Markdown checkbox, just as it does in Obsidian's normal reading view.
 
-Requires **Obsidian 1.8.7 or later**. Supports desktop and mobile.
+Requires **Obsidian 1.8.7 or later**. Designed for desktop and mobile. Mobile interaction has been checked in a simulator; physical iOS and Android devices have not yet been verified.
 
 ## Quick start
 
@@ -88,9 +88,11 @@ The 0.1 series does not include note editing beyond task-checkbox interactions, 
 
 1. From a [GitHub release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases), download `main.js`, `manifest.json`, and `styles.css`.
 2. Put all three files in `<vault>/.obsidian/plugins/focus-cards/` (or the equivalent directory if your vault uses a custom configuration folder).
-3. Reload Obsidian and enable **Section Reader** under **Settings → Community plugins**.
+3. Reload Obsidian and enable the plugin under **Settings → Community plugins**.
 
-The community-directory installation route becomes available only after the plugin is listed. These instructions do not imply that a listing or release is currently available.
+The latest published release, **0.1.2**, still uses the **Focus Cards** name. Enable **Focus Cards** when installing those release assets. The **Section Reader** branding in this branch is intended for the next release.
+
+Installation through Obsidian's community plugin directory becomes available only after the plugin is listed.
 
 ## Development
 
