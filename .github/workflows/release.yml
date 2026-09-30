@@ -15,14 +15,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run check
-      - name: Verify tag matches manifest
+      - name: Official Obsidian release-readiness checks
+        uses: ./.github/actions/obsidian-review
+        with:
+          github-token: ${{ github.token }}
+      - name: Verify release assets and exact tag
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-        run: node -e "const m=require('./manifest.json'); if (m.version !== process.env.RELEASE_TAG) process.exit(1)"
+        run: npm run check:package
       - name: Publish GitHub release assets
         env:
           GH_TOKEN: ${{ github.token }}

@@ -1,16 +1,37 @@
 # Section Reader
 
-Read long Obsidian notes one section at a time. Section Reader turns sections separated by root-level `---` lines into a focused card view, while keeping Obsidian's native Markdown rendering, links, and task interactions.
+Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.
 
-[简体中文](README.zh-CN.md)
+An Obsidian plugin that turns sections separated by root-level `---` lines into a focused reading view. Your note stays in one file.
 
-## What it does
+[简体中文](README.zh-CN.md) · [Install](#installation) · [Try it](#quick-start)
 
-- Show one section at a time without splitting your note into separate files
-- Navigate with keyboard commands on desktop or edge double-taps on mobile
-- Jump to a card from the outline or a heading or block link within the same note
-- Keep reading progress for each note and remember each card's scroll position during the current browsing session
-- Preserve footnotes, reference links, embeds, and task interactions by rendering the whole note with Obsidian's native Markdown renderer
+## See it in action
+
+![Section Reader walkthrough: ordinary note, focused section, next section, Outline jump, same-note link, and return to the note](docs/media/section-reader-demo.gif)
+
+A step-by-step walkthrough assembled from real Obsidian screenshots: toggle Section Reader → move right to the next section → jump using the Outline → follow a same-note link → press `Esc` to return.
+
+Captured on Obsidian 1.13.7 for Linux using this repository's Section Reader build and the [synthetic demo note](docs/demo-note.md).
+
+<details>
+<summary>Compare the original note and section view</summary>
+
+**Original note:** several sections in one continuous reading view.
+
+![Original note in Obsidian reading view with multiple sections and the Outline](docs/media/original-note.png)
+
+**Section Reader:** one section at a time, with the same Outline still available.
+
+![The same note in Section Reader, showing one section and retaining the Outline](docs/media/section-view.png)
+
+</details>
+
+## Why use it?
+
+- **Focus on one section.** Turn a long reading or study note into manageable cards, without splitting it into separate files
+- **Keep your place.** Move between cards with the keyboard or mobile edge double-taps, and resume from the note's saved reading position
+- **Keep the connections.** Use the outline and same-note heading or block links to jump between sections, with Obsidian's native Markdown rendering, footnotes, embeds, and task interactions
 
 Reading in card view does not rewrite your Markdown. Checking or unchecking a task does update its Markdown checkbox, just as it does in Obsidian's normal reading view.
 
@@ -20,7 +41,7 @@ Requires **Obsidian 1.8.7 or later**. Designed for desktop and mobile. Mobile in
 
 1. Open a Markdown note with a standalone `---` line between sections. Leave a blank line on either side so it is parsed as a horizontal rule.
 2. Click **Toggle Section Reader** in the ribbon, or run **Section Reader: Toggle card browsing mode** from the command palette.
-3. Use the left and right arrow keys on desktop. On mobile, double-tap the left edge for the previous card or the right edge for the next card.
+3. Click inside the section view, then use the left and right arrow keys on desktop. On mobile, double-tap the left edge for the previous card or the right edge for the next card.
 4. Run the toggle command again, or press `Esc`, to return to the original Markdown view.
 
 ```markdown
@@ -59,7 +80,7 @@ When you enter focus mode from the editor, the card containing your cursor opens
 | Next card | `next-card` |
 | Previous card | `previous-card` |
 
-The internal plugin ID remains `focus-cards`, so the installation folder is unchanged.
+The plugin ID and installation folder are `section-reader`. Upgrading from Focus Cards? Follow the [migration guide](docs/migration.md).
 
 No global hotkeys are assigned by default. Assign your own under **Settings → Hotkeys**.
 
@@ -80,17 +101,24 @@ The plugin reads Obsidian's interface language when it loads. Chinese language c
 
 Reading progress is saved through Obsidian's plugin data storage, separately from the Markdown note. The stored entries contain the note path, card index, card key, and last-updated timestamp. Per-card scroll positions are retained for the current browsing session.
 
-The 0.1 series does not include note editing beyond task-checkbox interactions, fullscreen presentations, autoplay, export, a theme system, custom separators, or visible next/previous buttons.
+The current version does not include note editing beyond task-checkbox interactions, fullscreen presentations, autoplay, export, a theme system, custom separators, or visible next/previous buttons.
 
 ## Installation
 
-### Manual installation
+### Current Section Reader build
 
-1. From a [GitHub release](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases), download `main.js`, `manifest.json`, and `styles.css`.
-2. Put all three files in `<vault>/.obsidian/plugins/focus-cards/` (or the equivalent directory if your vault uses a custom configuration folder).
-3. Reload Obsidian and enable the plugin under **Settings → Community plugins**.
+The Section Reader rename and `section-reader` ID are not yet in a published release. To try the version shown above:
 
-The latest published release, **0.1.2**, still uses the **Focus Cards** name. Enable **Focus Cards** when installing those release assets. The **Section Reader** branding in this branch is intended for the next release.
+1. Download or clone this repository. With Node.js 20 or later, run `npm ci` and `npm run build` in its folder.
+2. Copy the resulting `main.js`, `manifest.json`, and `styles.css` into `<vault>/.obsidian/plugins/section-reader/` (use your vault's equivalent directory if it has a custom configuration folder).
+3. Reload Obsidian, enable community plugins if needed, then enable **Section Reader** under **Settings → Community plugins**.
+4. Open [the demo note](docs/demo-note.md) and follow [Quick start](#quick-start).
+
+If you used Focus Cards before, follow the [migration guide](docs/migration.md) to preserve reading progress and reassign hotkeys. Do not enable both installations at once.
+
+### Published legacy release
+
+The latest [published release, 0.1.2](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases), still uses the **Focus Cards** name and `focus-cards` ID. Its three release files belong in `<vault>/.obsidian/plugins/focus-cards/`, and it appears as **Focus Cards** in settings. Do not put those legacy files in the new `section-reader` folder.
 
 Installation through Obsidian's community plugin directory becomes available only after the plugin is listed.
 
@@ -109,7 +137,7 @@ Run the full validation suite:
 npm run check
 ```
 
-This runs TypeScript checks against the current API and the minimum supported Obsidian 1.8.7 API, followed by ESLint, Vitest, and a production build. The existing CI workflow runs the same check for pull requests. For release builds, the existing release workflow also verifies that the version tag matches `manifest.json`.
+This runs TypeScript checks against the current API and the minimum supported Obsidian 1.8.7 API, ESLint (including Obsidian plugin rules), Vitest, release-check tests, a production build, and packaging checks. CI runs the same command for pull requests. Release builds also verify the version tag. See [release checks](docs/release-checks.md) for coverage and limitations.
 
 ## License
 
