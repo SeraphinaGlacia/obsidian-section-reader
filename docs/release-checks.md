@@ -10,7 +10,7 @@ npm audit
 npm run check
 ```
 
-`npm run check` runs TypeScript against the current and minimum Obsidian APIs, ESLint, Vitest, the release-gate regression tests, a production build, and packaging checks. Source code must use Obsidian's DOM creation helpers; browser primitives are permitted only in test fixtures that supply those host helpers.
+`npm run check` runs TypeScript against the current and minimum Obsidian APIs, ESLint, Vitest, the release-gate and manual-release guard regression tests, a production build, and packaging checks. Source code must use Obsidian's DOM creation helpers; browser primitives are permitted only in test fixtures that supply those host helpers.
 
 The test environment uses jsdom 28 to avoid the deprecated `whatwg-encoding` dependency. Project-scoped `.npmrc` entries approve only the reviewed `esbuild@0.28.2` and macOS `fsevents@2.3.3` installation scripts, independently of user-wide npm settings. Review these pins when upgrading either package.
 
@@ -56,6 +56,31 @@ done
 ```
 
 An attestation establishes build origin and file identity; it does not certify that the software has no bugs. Existing 0.2.0 release files and tags remain unchanged. See [GitHub's artifact attestation documentation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations).
+
+## Manual release preparation
+
+The Release workflow also supports a manual entry point for maintainers who cannot push a tag directly:
+
+1. Merge the intended version and wait for the latest CI push run on that exact `main` commit to succeed.
+2. Open Actions → Release → Run workflow, select `main`, and start the run.
+3. The preparation job validates package identity, versions, descriptions, compatibility, current `main`, CI, and existing tags/releases. It creates the numeric tag from `manifest.version` at that exact commit, then explicitly dispatches Release on the tag.
+4. Follow the separate tag-scoped Release run. It repeats all existing checks, verifies the exact version tag, signs and verifies all three assets, and publishes only after every gate passes.
+
+Tag pushes made with `GITHUB_TOKEN` do not automatically trigger another workflow. The explicit tag dispatch is necessary and ensures provenance still identifies `refs/tags/<version>`, rather than the mutable `main` branch. The tag run skips preparation, so it cannot dispatch itself recursively.
+
+Permissions are scoped by job. Preparation receives only `contents: write` to create the tag and `actions: write` to start the tag workflow. GitHub's Actions write permission is broader than dispatching one workflow; the preparation script limits its use to this repository's Release workflow. The token is short-lived and no personal token, new secret, or OAuth grant is stored. The release job retains its original `contents: write`, `id-token: write`, and `attestations: write` permissions; it does not receive Actions write access. Preparation installs no project dependencies.
+
+Preparation runs only for a manual dispatch on this repository's `main`. Per-ref concurrency prevents overlapping runs. It checks the latest successful CI for the exact source SHA and rechecks `main` immediately before writing. Existing tags are never moved: an identical tag may be reused after an interrupted attempt, while a conflicting tag stops the run. Any existing published or draft release stops preparation for inspection. A same-named branch is rejected, and dispatch always uses the fully qualified tag ref. An active or successful tag release run is reused instead of duplicated; completed runs must show a successful, non-skipped release job.
+
+If an API request fails or times out after writing, inspect the tag and Actions runs before retrying; do not delete a tag or overwrite assets to recover. A rerun can reuse a matching tag after a confirmed failed dispatch. If `main` has advanced, start a fresh preparation run only after reviewing the new commit and its CI.
+
+Run the isolated guard tests without installing dependencies:
+
+```sh
+node --test scripts/prepare-release.node.mjs
+```
+
+These fixtures cover input/context validation, CI gating, main-branch drift, release pagination, tag identity, duplicate-run avoidance, API failures, and safe interrupted-run recovery. They do not create real tags or releases.
 
 ## Validation limits
 
