@@ -6,7 +6,7 @@
   <a href="#32-usage">Get started</a>
 </p>
 
-> Read long Markdown notes one section at a time, with native links, embeds, task interactions, and reading progress preserved.
+> Read long notes one section at a time, without splitting files.
 
 Section Reader is an Obsidian plugin for reading long notes: it turns sections separated by root-level `---` lines into a view that displays one section at a time, while preserving native links, embeds, task interactions, and reading progress. Your note stays in a single file. Browsing does not modify the Markdown; checking or unchecking a task checkbox updates the corresponding Markdown marker.
 
