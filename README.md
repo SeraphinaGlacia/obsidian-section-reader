@@ -64,7 +64,7 @@ Once you have the files, complete these steps:
 
 ### 3.2 Usage
 
-Copy the [demo note](docs/demo-note.md) into your vault to try it out, or open one of your own notes. The demo includes three sections, heading links within the same note, footnotes, and optional task checkboxes.
+Open any Markdown note in your vault to try Section Reader.
 
 When several concepts are written in the same Markdown note, the content stacks up from top to bottom. As the note gets longer, it becomes easier to lose focus while reading and reviewing.
 

@@ -126,6 +126,10 @@ test-vault/
 tmp/
 .obsidian/
 
+# Generated promotion artwork
+/docs/media/promotion/
+/docs/promotion/export-manifest.json
+
 # TernJS port file
 .tern-port
 

@@ -57,10 +57,10 @@ done
 
 An attestation establishes build origin and file identity; it does not certify that the software has no bugs. Existing 0.2.0 release files and tags remain unchanged. See [GitHub's artifact attestation documentation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations).
 
-## Limits and remaining acceptance
+## Validation limits
 
 Passing CI does not guarantee community directory approval. The official action provides partial parity: published-release/build verification, private heuristics, and some behavioral/network checks remain with the authoritative directory review. This workflow does not run the directory's entire release service offline.
 
-The [0.2.0 acceptance record](release-acceptance-0.2.0.md) covers a disposable vault in native Obsidian on macOS and its mobile UI emulation. Physical iOS/Android devices and old Focus Cards reading-progress migration were not tested. The new plugin ID installs separately from Focus Cards; do not enable both identities together. Browser-level CSS checks and mocked host tests do not replace native Obsidian acceptance.
+Browser-level CSS checks, mocked host tests, and mobile UI emulation do not replace testing in native Obsidian on desktop and physical mobile devices.
 
 Sources: [official action inputs](https://github.com/obsidianmd/obsidian-workflows/blob/8167caed39664214d82c86fdfa32e06d8d55f61d/action.yml), [official scanner dependencies](https://github.com/obsidianmd/obsidian-workflows/blob/8167caed39664214d82c86fdfa32e06d8d55f61d/src/lint.ts), [directory FAQ](https://docs.obsidian.md/community-directory/faq).
