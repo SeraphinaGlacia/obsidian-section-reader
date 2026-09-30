@@ -86,4 +86,4 @@ jobs:
       - name: Publish GitHub release assets
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css --generate-notes --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css --title "Section Reader $GITHUB_REF_NAME" --generate-notes --verify-tag
