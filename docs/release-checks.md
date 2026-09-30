@@ -45,6 +45,5 @@ Before publication:
 - Review and merge the preparation PR only when authorized; do not reuse the existing 0.1.2 tag
 - Test the new installation and [old-install migration](migration.md) in a disposable vault, plus available physical mobile devices
 - Make repository visibility and directory submission decisions explicitly; neither is changed by this branch
-- Align the repository About text with the exact manifest/package description; the previous About sentence still contains “in Obsidian,” which the official manifest policy forbids
 - When release authorization is given, tag the validated 0.2.0 commit; the tag workflow gates asset upload on the checks above
 - Submit/review the new identity through the current Obsidian Community directory and resolve any authoritative online findings
