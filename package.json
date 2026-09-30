@@ -25,9 +25,9 @@
   "author": "Xinlei Zhou",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SeraphinaGlacia/obsidian-focus-cards.git"
+    "url": "git+https://github.com/SeraphinaGlacia/obsidian-section-reader.git"
   },
-  "homepage": "https://github.com/SeraphinaGlacia/obsidian-focus-cards#readme",
+  "homepage": "https://github.com/SeraphinaGlacia/obsidian-section-reader#readme",
   "license": "MIT",
   "engines": {
     "node": ">=20"
