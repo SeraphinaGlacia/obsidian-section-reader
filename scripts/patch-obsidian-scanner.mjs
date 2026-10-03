@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,7 +16,11 @@ if (digest !== upstreamDigest) {
   throw new Error("Official action bundle changed; review the scanner dependency patch before updating its pin");
 }
 
-const patch = fileURLToPath(new URL("./patches/obsidian-scanner-moment.patch", import.meta.url));
+const patch = fileURLToPath(new URL("./patches/obsidian-scanner-dependencies.patch", import.meta.url));
 execFileSync("git", ["-C", actionDir, "apply", "--check", patch], { stdio: "inherit" });
 execFileSync("git", ["-C", actionDir, "apply", patch], { stdio: "inherit" });
-process.stdout.write("Applied scanner dependency patch: Moment 2.31.0 and npm audit; official rules unchanged.\n");
+mkdirSync(resolve(actionDir, "dist/patches"), { recursive: true });
+for (const file of ["scanner-dependencies.mjs", "patches/braces-depth.patch", "patches/braces-depth-hashes.json"]) {
+  copyFileSync(new URL(file, import.meta.url), resolve(actionDir, "dist", file));
+}
+process.stdout.write("Applied scanner dependency repairs and audit gate; official rules unchanged.\n");

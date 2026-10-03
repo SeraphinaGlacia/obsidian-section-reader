@@ -26,25 +26,29 @@ for (const [label, statuses] of [
       fs$1: fs,
       path$2: path,
       os$1: { tmpdir: () => root },
+      process: { execPath: process.execPath, argv: [process.execPath, process.env.OBSIDIAN_SCANNER_BUNDLE] },
       exec: (command, args, options) => {
         const pkg = JSON.parse(fs.readFileSync(path.join(options.cwd, "package.json"), "utf8"));
         assert.deepEqual(pkg.dependencies, deps);
-        assert.deepEqual(pkg.overrides, { moment: "2.31.0" });
+        assert.deepEqual(pkg.overrides, { moment: "2.31.0", braces: "3.0.3" });
         assert.equal(options.ignoreReturnCode, true);
         calls.push([command, ...args]);
+        if (command === process.execPath) {
+          assert.equal(args[0], path.join(path.dirname(process.env.OBSIDIAN_SCANNER_BUNDLE), "scanner-dependencies.mjs"));
+          assert.equal(args[1], options.cwd);
+        }
         return Promise.resolve(statuses[calls.length - 1]);
       },
     });
 
     if (statuses.includes(1)) {
-      await assert.rejects(bootstrap(deps), /install scanner lint dependencies|dependency audit failed/);
+      await assert.rejects(bootstrap(deps), /install scanner lint dependencies|dependency repair or audit failed/);
       assert.deepEqual(fs.readdirSync(root), [], "Failed scanners must remove their dependency directory");
     } else {
       const scannerDir = await bootstrap(deps);
       assert.ok(fs.existsSync(path.join(scannerDir, "package.json")));
     }
-    assert.deepEqual(calls, statuses.length === 1
-      ? [["npm", "install"]]
-      : [["npm", "install"], ["npm", "audit", "--audit-level=low"]]);
+    assert.deepEqual(calls[0], ["npm", "install", "--ignore-scripts", "--no-audit"]);
+    assert.equal(calls.length, statuses.length);
   });
 }

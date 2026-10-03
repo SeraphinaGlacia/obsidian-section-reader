@@ -1,27 +1,31 @@
 diff --git a/dist/index.js b/dist/index.js
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -65470,7 +65470,8 @@ async function createScannerDepsDir(deps) {
+@@ -65470,10 +65470,11 @@ async function createScannerDepsDir(deps) {
      const pkg = {
          name: 'obsidian-scanner-lint',
          private: true,
 -        dependencies: deps
 +        dependencies: deps,
-+        overrides: { moment: '2.31.0' }
++        overrides: { moment: '2.31.0', braces: '3.0.3' }
      };
      fs$1.writeFileSync(path$2.join(tempDir, 'package.json'), JSON.stringify(pkg));
-     const exitCode = await exec('npm', ['install'], {
+-    const exitCode = await exec('npm', ['install'], {
++    const exitCode = await exec('npm', ['install', '--ignore-scripts', '--no-audit'], {
+         cwd: tempDir,
+         ignoreReturnCode: true
+     });
 @@ -65481,6 +65482,14 @@ async function createScannerDepsDir(deps) {
          fs$1.rmSync(tempDir, { recursive: true, force: true });
          throw new Error('Failed to install scanner lint dependencies.');
      }
-+    const auditExitCode = await exec('npm', ['audit', '--audit-level=low'], {
++    const auditExitCode = await exec(process.execPath, [path$2.join(path$2.dirname(process.argv[1]), 'scanner-dependencies.mjs'), tempDir], {
 +        cwd: tempDir,
 +        ignoreReturnCode: true
 +    });
 +    if (auditExitCode !== 0) {
 +        fs$1.rmSync(tempDir, { recursive: true, force: true });
-+        throw new Error('Scanner lint dependency audit failed.');
++        throw new Error('Scanner lint dependency repair or audit failed.');
 +    }
      return tempDir;
  }
