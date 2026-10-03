@@ -109,7 +109,7 @@ Total assets stay the same: equipment increases while cash decreases.
 
 ## 四、开发
 
-需要 Node.js 24 LTS 和 pnpm 11.7.0，分别声明在 `.node-version` 与 `package.json` 中。`packageManager` 固定 pnpm 版本；依赖覆盖与已审核的安装脚本配置在 `pnpm-workspace.yaml` 中。
+推荐使用 Node.js 24 LTS 和 pnpm 11.7.0，分别声明在 `.node-version` 与 `package.json` 中。源码构建也支持 22.x 系列的 Node.js 22.13 及以上版本，以及 Node.js 24 或更新版本。`packageManager` 固定 pnpm 版本；从其他 pnpm 版本启动时，会下载并使用该固定版本。依赖覆盖与已审核的安装脚本配置在 `pnpm-workspace.yaml` 中。
 
 ```bash
 pnpm install --frozen-lockfile

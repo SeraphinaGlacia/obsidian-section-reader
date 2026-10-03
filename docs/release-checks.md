@@ -1,6 +1,6 @@
 # Release checks
 
-Use Node.js 24 LTS and pnpm 11.7.0. `.node-version` selects the local and CI baseline; `package.json` pins pnpm and restricts the supported Node major. Every push and pull request runs a frozen dependency install, `pnpm audit --audit-level=low`, the project's full checks, and the official Obsidian review tooling. Tag releases repeat these checks before uploading release assets. A normal commit does not create a release.
+Use Node.js 24 LTS and pnpm 11.7.0. `.node-version` selects the local and release baseline; `package.json` permits Node.js `^22.13.0 || >=24.0.0`, matching pnpm and the locked development dependencies. CI also performs clean installs and full project checks on Node.js 22.13.0 and 26. Every push and pull request runs a frozen dependency install, `pnpm audit --audit-level=low`, the project's full checks, and the official Obsidian review tooling. Tag releases repeat the baseline checks before uploading release assets. A normal commit does not create a release.
 
 ## Local checks
 
@@ -12,7 +12,7 @@ pnpm run check
 
 `pnpm run check` runs TypeScript against the current and minimum Obsidian APIs, ESLint, Vitest, the release-gate and manual-release guard regression tests, a production build, and packaging checks. Source code must use Obsidian's DOM creation helpers; browser primitives are permitted only in test fixtures that supply those host helpers.
 
-The test environment uses jsdom 28 to avoid the deprecated `whatwg-encoding` dependency. Project-scoped `allowBuilds` entries in `pnpm-workspace.yaml` approve only the reviewed `esbuild@0.28.2` and macOS `fsevents@2.3.3` installation scripts. `strictDepBuilds` rejects unreviewed scripts. Review these pins when upgrading either package. The workspace configuration also rejects unsupported Node versions, mismatched pnpm versions, and running scripts with stale dependencies; it does not automatically install another package manager. See [pnpm's build settings](https://pnpm.io/settings/build) and [CLI settings](https://pnpm.io/settings/cli).
+The test environment uses jsdom 28 to avoid the deprecated `whatwg-encoding` dependency. Project-scoped `allowBuilds` entries in `pnpm-workspace.yaml` approve only the reviewed `esbuild@0.28.2` and macOS `fsevents@2.3.3` installation scripts. `strictDepBuilds` rejects unreviewed scripts. Review these pins when upgrading either package. The workspace configuration rejects unsupported Node versions and running scripts with stale dependencies. `pmOnFail: download` lets a different pnpm launcher fetch and execute the exact version in `packageManager`, without replacing the globally installed launcher. External reviewers therefore do not need our local Node major or a preinstalled matching pnpm version. Frozen resolution, dependency engine checks, build approvals, and vulnerability gates remain enforced. See [pnpm's build settings](https://pnpm.io/settings/build) and [CLI settings](https://pnpm.io/settings/cli).
 
 `pnpm-lock.yaml` was imported from the npm lockfile with `pnpm import`. Keep it as the sole project lockfile, and use `pnpm install --frozen-lockfile` for reproducible installs. When switching an existing checkout from npm, move the old `node_modules` directory aside before installing with pnpm. CI installs the pinned pnpm version before restoring its store cache and running the frozen install; it does not cache `node_modules`.
 
@@ -99,6 +99,8 @@ These fixtures cover input/context validation, CI gating, main-branch drift, rel
 ## Validation limits
 
 Passing CI does not guarantee community directory approval. The official action provides partial parity: published-release/build verification, private heuristics, and some behavioral/network checks remain with the authoritative directory review. This workflow does not run the directory's entire release service offline.
+
+Before publishing a tooling or dependency migration, use **Review branch** in the Community management page with the final commit SHA. Require a completed source review, including dependency installation and all dependent checks. After publishing, use **Check for new releases** and verify the new version's actual directory review. A successful GitHub release alone is not evidence that the Community review passed. Version 0.2.3 exposed this gap: its GitHub checks passed, but Community could not install its source dependencies. The Community result does not disclose its runtime or installation stderr; local compatibility reproductions must not be presented as the server's exact diagnostic.
 
 Browser-level CSS checks, mocked host tests, and mobile UI emulation do not replace testing in native Obsidian on desktop and physical mobile devices.
 

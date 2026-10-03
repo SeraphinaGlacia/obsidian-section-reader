@@ -2,7 +2,8 @@ packages:
   - '.'
 
 engineStrict: true
-pmOnFail: error
+# Use the pinned version when an external reviewer starts with another pnpm release.
+pmOnFail: download
 verifyDepsBeforeRun: error
 
 overrides:

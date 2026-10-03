@@ -33,7 +33,7 @@
   "homepage": "https://github.com/SeraphinaGlacia/obsidian-section-reader#readme",
   "license": "MIT",
   "engines": {
-    "node": "24.x"
+    "node": "^22.13.0 || >=24.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

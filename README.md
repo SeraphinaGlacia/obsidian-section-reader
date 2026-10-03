@@ -109,7 +109,7 @@ Total assets stay the same: equipment increases while cash decreases.
 
 ## 4. Development
 
-Requires Node.js 24 LTS and pnpm 11.7.0, as declared in `.node-version` and `package.json`. The pnpm version is fixed by `packageManager`; dependency overrides and reviewed installation scripts are configured in `pnpm-workspace.yaml`.
+Use Node.js 24 LTS and pnpm 11.7.0, as declared in `.node-version` and `package.json`. Source builds also support Node.js 22.13+ in the 22.x line and Node.js 24 or newer. The pnpm version is fixed by `packageManager`; another pnpm launcher downloads and runs that pinned version. Dependency overrides and reviewed installation scripts are configured in `pnpm-workspace.yaml`.
 
 ```bash
 pnpm install --frozen-lockfile
