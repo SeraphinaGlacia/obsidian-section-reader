@@ -1,6 +1,6 @@
 {
   "name": "obsidian-section-reader",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Read long notes one section at a time, without splitting files.",
   "main": "main.js",
   "type": "module",
