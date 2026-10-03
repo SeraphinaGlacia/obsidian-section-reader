@@ -4,7 +4,8 @@ packages:
 engineStrict: true
 # Use the pinned version when an external reviewer starts with another pnpm release.
 pmOnFail: download
-verifyDepsBeforeRun: error
+# Review sandboxes may move an installed tree; frozen installs validate dependency freshness.
+verifyDepsBeforeRun: false
 
 overrides:
   moment: 2.31.0

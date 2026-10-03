@@ -57,6 +57,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=low
       - run: pnpm run check
+      - name: Verify builds after relocating installed dependencies
+        run: node scripts/check-relocated-build.mjs
       - name: Official Obsidian release-readiness checks
         uses: ./.github/actions/obsidian-review
         with:
