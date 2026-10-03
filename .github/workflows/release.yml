@@ -27,7 +27,8 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 24
+          node-version-file: .node-version
+          package-manager-cache: false
       - name: Test manual release guards
         run: node --test scripts/prepare-release.node.mjs
       - name: Create the version tag and dispatch its release
@@ -46,11 +47,16 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm audit
-      - run: npm run check
+          node-version-file: .node-version
+          package-manager-cache: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          run_install: false
+          cache: true
+          cache_dependency_path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=low
+      - run: pnpm run check
       - name: Official Obsidian release-readiness checks
         uses: ./.github/actions/obsidian-review
         with:
@@ -58,7 +64,7 @@ jobs:
       - name: Verify release assets and exact tag
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-        run: npm run check:package
+        run: pnpm run check:package
       - name: Attest the three release assets
         id: provenance
         # actions/attest v4.2.2.

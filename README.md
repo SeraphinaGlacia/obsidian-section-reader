@@ -55,7 +55,7 @@ Press **Ctrl + Alt + U** → switch to reading one section at a time → use **�
 First, choose one way to obtain the installation files:
 
 - **Download a release:** Go to [Releases](https://github.com/SeraphinaGlacia/obsidian-section-reader/releases) and download `main.js`, `manifest.json`, and `styles.css` from the same Section Reader version.
-- **Build from source:** Download or clone this repository. With Node.js 24 or later, run `npm ci` and `npm run build` to generate those three files.
+- **Build from source:** Download or clone this repository. With Node.js 24 LTS and pnpm 11.7.0, run `pnpm install --frozen-lockfile` and `pnpm run build` to generate those three files.
 
 Once you have the files, complete these steps:
 
@@ -109,20 +109,20 @@ Total assets stay the same: equipment increases while cash decreases.
 
 ## 4. Development
 
-Requires Node.js 24 or later.
+Requires Node.js 24 LTS and pnpm 11.7.0, as declared in `.node-version` and `package.json`. The pnpm version is fixed by `packageManager`; dependency overrides and reviewed installation scripts are configured in `pnpm-workspace.yaml`.
 
 ```bash
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm run dev
 ```
 
 Full validation:
 
 ```bash
-npm run check
+pnpm run check
 ```
 
-`npm run check` runs TypeScript checks against the current API and the minimum supported Obsidian 1.8.7 API, followed by ESLint (including Obsidian plugin rules), Vitest, release-check tests, a production build, and packaging checks. CI runs the same command for pull requests; release builds also check the version tag. See [release checks](docs/release-checks.md) for coverage and limitations.
+`pnpm run check` runs TypeScript checks against the current API and the minimum supported Obsidian 1.8.7 API, followed by ESLint (including Obsidian plugin rules), Vitest, release-check tests, a production build, and packaging checks. CI runs the same command for pull requests; release builds also check the version tag. See [release checks](docs/release-checks.md) for coverage and limitations.
 
 ## 5. Additional information
 

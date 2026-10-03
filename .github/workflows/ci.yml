@@ -14,11 +14,16 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm audit
-      - run: npm run check
+          node-version-file: .node-version
+          package-manager-cache: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          run_install: false
+          cache: true
+          cache_dependency_path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=low
+      - run: pnpm run check
       - name: Official Obsidian release-readiness checks
         uses: ./.github/actions/obsidian-review
         with:

@@ -21,6 +21,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_TYPE: plugin
         INPUT_MODE: pr
+        INPUT_BUILD: pnpm run build
         INPUT_SCANNER-LINT: "true"
         INPUT_STRICT: "true"
         INPUT_NODE-VERSION: "24"

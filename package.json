@@ -4,6 +4,7 @@
   "description": "Read long notes one section at a time, without splitting files.",
   "main": "main.js",
   "type": "module",
+  "packageManager": "pnpm@11.7.0",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
@@ -12,10 +13,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && npm run typecheck:min && npm run lint && npm run test && npm run test:release-checks && npm run build && npm run check:package",
+    "check": "pnpm run typecheck && pnpm run typecheck:min && pnpm run lint && pnpm run test && pnpm run test:release-checks && pnpm run build && pnpm run check:package",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "check:package": "node scripts/check-package.mjs",
-    "test:release-checks": "node --test scripts/release-checks.node.mjs scripts/prepare-release.node.mjs"
+    "test:release-checks": "node --test scripts/release-checks.node.mjs scripts/prepare-release.node.mjs scripts/package-checks.node.mjs"
   },
   "keywords": [
     "obsidian",
@@ -32,7 +33,7 @@
   "homepage": "https://github.com/SeraphinaGlacia/obsidian-section-reader#readme",
   "license": "MIT",
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -48,8 +49,5 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0",
     "vitest": "^4.1.11"
-  },
-  "overrides": {
-    "moment": "2.31.0"
   }
 }

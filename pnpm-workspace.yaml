@@ -1,0 +1,17 @@
+packages:
+  - '.'
+
+engineStrict: true
+pmOnFail: error
+verifyDepsBeforeRun: error
+
+overrides:
+  moment: 2.31.0
+  # Drop only the stale peer; retain the plugin's own Obsidian 1.12.3 dependency as npm resolved it.
+  eslint-plugin-obsidianmd@0.4.2>obsidian@1.8.7: '-'
+
+# Keep build approvals scoped to the reviewed package versions.
+strictDepBuilds: true
+allowBuilds:
+  esbuild@0.28.2: true
+  fsevents@2.3.3: true

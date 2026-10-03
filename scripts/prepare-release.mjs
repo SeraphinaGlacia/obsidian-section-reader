@@ -13,17 +13,14 @@ function expectOk(response, label) {
 }
 
 export function releaseVersion(metadata) {
-  const { manifest, pkg, lock, versions } = metadata;
+  const { manifest, pkg, versions } = metadata;
   assert.equal(manifest.id, "section-reader", "Unexpected plugin identity");
   assert.equal(manifest.name, "Section Reader", "Unexpected plugin name");
   assert.equal(pkg.name, "obsidian-section-reader", "Unexpected package name");
   assert.match(manifest.version, versionPattern, "Expected a numeric version without a v prefix");
   assert.equal(pkg.description, manifest.description, "Descriptions must match");
-  assert.equal(lock.name, pkg.name, "Lockfile name must match");
-  assert.equal(lock.packages[""].name, pkg.name, "Lockfile root name must match");
-  for (const version of [pkg.version, lock.version, lock.packages[""].version]) {
-    assert.equal(version, manifest.version, "Versions must match");
-  }
+  assert.equal(pkg.packageManager, "pnpm@11.7.0", "Use the reviewed pnpm version");
+  assert.equal(pkg.version, manifest.version, "Versions must match");
   assert.equal(versions[manifest.version], manifest.minAppVersion, "Compatibility entry must match");
   return manifest.version;
 }
@@ -169,7 +166,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     metadata: {
       manifest: readJson("manifest.json"),
       pkg: readJson("package.json"),
-      lock: readJson("package-lock.json"),
       versions: readJson("versions.json"),
     },
     request: createGitHubRequest(process.env.GH_TOKEN),

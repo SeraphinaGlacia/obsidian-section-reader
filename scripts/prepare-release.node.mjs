@@ -10,8 +10,7 @@ const version = "0.2.2";
 const context = { repository: "SeraphinaGlacia/obsidian-section-reader", eventName: "workflow_dispatch", ref: "refs/heads/main", sha };
 const metadata = {
   manifest: { id: "section-reader", name: "Section Reader", version, minAppVersion: "1.8.7", description: "Read one section." },
-  pkg: { name: "obsidian-section-reader", version, description: "Read one section." },
-  lock: { name: "obsidian-section-reader", version, packages: { "": { name: "obsidian-section-reader", version } } },
+  pkg: { name: "obsidian-section-reader", version, description: "Read one section.", packageManager: "pnpm@11.7.0" },
   versions: { [version]: "1.8.7" },
 };
 
@@ -86,7 +85,8 @@ for (const [label, update] of [
   ["non-numeric version", (m) => { m.manifest.version = "0.2.2;echo nope"; }],
   ["v-prefixed version", (m) => { m.manifest.version = "v0.2.2"; }],
   ["package mismatch", (m) => { m.pkg.version = "0.2.1"; }],
-  ["lock mismatch", (m) => { m.lock.packages[""].version = "0.2.1"; }],
+  ["package manager mismatch", (m) => { m.pkg.packageManager = "npm@12.0.2"; }],
+  ["unpinned package manager", (m) => { delete m.pkg.packageManager; }],
   ["description mismatch", (m) => { m.pkg.description = "Other"; }],
   ["compatibility mismatch", (m) => { m.versions[version] = "1.0.0"; }],
   ["wrong plugin", (m) => { m.manifest.id = "other"; }],
