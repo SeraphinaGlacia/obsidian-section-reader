@@ -6,9 +6,9 @@
   <a href="#32-usage">Get started</a>
 </p>
 
-> Read long notes one section at a time, without splitting files.
+> Read and edit long notes one section at a time, without splitting files.
 
-Section Reader is an Obsidian plugin for reading long notes: it turns sections separated by root-level `---` lines into a view that displays one section at a time, while preserving native links, embeds, task interactions, and reading progress. Your note stays in a single file. Browsing does not modify the Markdown; checking or unchecking a task checkbox updates the corresponding Markdown marker.
+Section Reader adds section focus to Obsidian's native Markdown view. Sections separated by root-level `---` lines appear one at a time, while the complete note stays in its original file. Enable native mode switching in settings to switch between Reading view and Editing view, including Live Preview and Source mode, without leaving section focus. Native links, embeds, task interactions, and reading progress remain available. Browsing does not change your Markdown; editing and task checkbox actions save through Obsidian.
 
 Requires **Obsidian 1.8.7 or later**, for desktop and mobile.
 
@@ -16,7 +16,7 @@ Requires **Obsidian 1.8.7 or later**, for desktop and mobile.
 
 ![Continuous screen recording: browse the full note, press the demo shortcut to enter the section view, then use the left and right arrow keys to turn pages](docs/media/section-reader-demo.gif)
 
-Press **Ctrl + Alt + U** → switch to reading one section at a time → use **→ / ←** to move forward and back. The key labels show the keys actually pressed during the recording.
+Press **Ctrl + Alt + U** → switch to reading one section at a time → use **→ / ←** to move forward and back. The key labels show the keys actually pressed during the recording. This recording shows the reading workflow in 0.2.x; 0.3.0 also supports focused editing.
 
 > [!NOTE]
 > **Ctrl + Alt + U is a custom shortcut configured only for this demo.** Section Reader does not assign a toggle hotkey by default; you can set one under “Settings → Hotkeys”.
@@ -37,6 +37,7 @@ Press **Ctrl + Alt + U** → switch to reading one section at a time → use **�
 ## 2. Why use it?
 
 - **Focus on the current section.** Turn long reading notes or study materials into cards you can browse one section at a time, without splitting them into multiple files
+- **Edit without leaving the section.** Use the native editor to annotate text or run editor commands such as Templater, then return to Reading view in the same section
 - **Remember your reading position.** Move between cards with the keyboard or by double-tapping the screen edges on mobile, and resume from the note's saved reading progress
 - **Keep the connections between content.** Navigate through the Outline and heading or block links within the same note, while retaining Obsidian's native Markdown rendering, footnotes, embeds, and task interactions
 
@@ -93,19 +94,35 @@ Buying equipment for USD 5,000 in cash:
 Total assets stay the same: equipment increases while cash decreases.
 ```
 
-- **Enter and exit:** Click the “Toggle Section Reader” icon on the left, or run the “Toggle card browsing mode” command. Trigger it again or press `Esc` to exit.
-- **Turn pages:** On desktop, click inside a card, then press `←` / `→`. On mobile, double-tap the left / right edge of the screen to go to the previous / next card, respectively.
-- **Jump between cards:** Use the Outline, heading links, or block links within the same note to jump directly to the corresponding card.
-- **Reading progress:** Entering from Editing view opens the card at your cursor; entering from Reading view resumes your last position. Closing the tab exits card mode but preserves your reading progress.
-- **Quick access:** Assign a toggle hotkey under “Settings → Hotkeys”. On mobile, add the command to the mobile toolbar or Quick Action.
+- **Enter and exit:** Click the “Toggle Section Reader” ribbon icon, or run “Toggle section focus”. Trigger it again to show the full note. In Reading view, `Esc` also exits focus; in Editing view, `Esc` keeps its native behavior.
+- **Read and edit:** Enable “Allow native reading/editing mode switching” in Section Reader settings, then exit and re-enter Section Reader. You can use Obsidian's native reading/editing command or view control while keeping the current section. With the setting off, Section Reader stays read-only until you exit. Setting changes apply only on re-entry; configured shortcuts stay unchanged.
+- **Turn pages:** In desktop Reading view, click the note and use `←` / `→`. In Editing view, these keys always belong to the editor; assign your own shortcuts to “Previous section” and “Next section” for navigation. On mobile, double-tap the left / right window edge in either mode. There are no added pagination buttons or toolbar controls. Selection, dragging, composition, and interactive controls take precedence over navigation.
+- **Jump and resume:** The Outline and same-note heading, block, and footnote links reveal the destination section. Entering focus from Editing view starts at the cursor; entering from Reading view resumes saved progress. Closing a tab ends its focus session but preserves progress.
+- **Quick access:** Configure your own hotkeys under “Settings → Hotkeys”. On mobile, the focus toggle can use Obsidian's ribbon or Quick Action; use the native reading/editing control for mode changes. No default hotkeys are assigned.
+
+**Page animation:** Previous/next navigation slides sections horizontally in both native modes. System “Reduce motion” preferences disable the animation. Moving the editing cursor does not trigger a page transition.
+
+### Editing and template commands
+
+The editor retains the entire Markdown document and its original positions. Select text **in Editing view**, then run your usual Templater command. For example, a template containing `【<% tp.file.selection() %>】` can wrap the selected word while the current section stays focused. Templater is a separate plugin, not a dependency bundled with Section Reader. Reading-view text selection follows native Obsidian behavior; it is not converted into an editor selection.
+
+Typing, selection, and deletion stay inside the visible section. To edit an existing section separator, frontmatter, or the whole note, turn section focus off. Native undo/redo and programmatic whole-document updates remain available; undo/redo can reveal another section when that is where the edit happened.
+
+You can type or paste new `---` separators inside a focused section. The editing area stays open while you type the new section's content. Switching to Reading view or navigating to another section applies the new boundaries, using the cursor's section as the starting point. The source is saved normally throughout; a partially typed separator does not force a page turn.
+
+In focused editing, section separators and their surrounding blank lines are masked, as are YAML properties and the blank lines after them. The first content line keeps its native formatting in every section. Source spacing remains in the file and returns when section focus is disabled; ordinary horizontal rules inside the section remain visible.
+
+For reliable `---` separators, leave a blank line above and below. CommonMark does not require blank lines around every thematic break, but `---` directly below paragraph text can instead be a Setext heading underline. These source-formatting rules are independent of the focus mask. See the [CommonMark thematic break rules](https://spec.commonmark.org/0.31.2/#thematic-breaks).
+
+Compatibility is verified with Templater's selection replacement in a test vault. Custom Anki templates and integrations still need testing with their own configuration. See the [0.3.0 validation notes](docs/native-focus-validation.md) for the checks and remaining device coverage.
 
 ## 3.3 Commands
 
 | Command | ID |
 | --- | --- |
-| Toggle card browsing mode | `toggle-card-view` |
-| Next card | `next-card` |
-| Previous card | `previous-card` |
+| Toggle section focus | `toggle-card-view` |
+| Next section | `next-card` |
+| Previous section | `previous-card` |
 
 ## 4. Development
 
@@ -144,13 +161,13 @@ Therefore, identical-looking text in YAML frontmatter, code blocks, blockquotes,
 
 ## 3. Feature scope
 
-- The entire note is rendered in one pass by Obsidian's native Markdown renderer to preserve the full context of footnotes, reference definitions, links, embeds, and task interactions across cards.
+- The native Markdown view retains the full document. Reading-view blocks are filtered by their original source lines, preserving context for footnotes, reference definitions, links, embeds, and task interactions. Editing uses the native CodeMirror editor with sections outside the focus hidden.
 - Cards follow the normal Markdown view's readable line length and margin settings, and do not extend to either edge of the desktop window.
-- Each card can scroll vertically on its own; its scroll position is retained when you return during the same browsing session.
-- Internal links to other notes open in a new tab in the normal Markdown view, while the original tab stays in focus mode. Heading and block links within the same note navigate in the current card view; clicking with a modifier key can still open them in a new tab.
+- In Reading view, each card can scroll vertically on its own; its scroll position is retained when you return during the same browsing session.
+- In Reading view, internal links to other notes open in a new tab in the normal Markdown view, while the original tab stays in focus mode. Heading and block links within the same note navigate in the current card view; clicking with a modifier key can still open them in a new tab.
 - On desktop, internal-link hover previews are handled through Obsidian's native Page preview events. With Hover Editor enabled, the same interactive preview popovers are available in card mode.
-- Browsing does not modify the Markdown; only actively checking or unchecking task checkboxes updates the corresponding markers through Obsidian's normal task behavior.
-- The current version does not include editing, fullscreen presentations, autoplay, export, a theme system, custom separators, or visible page navigation buttons.
+- Browsing does not modify Markdown. Text edits, templates, and task checkbox changes use the original file through the native editor and renderer.
+- The current version does not include fullscreen presentations, autoplay, export, a theme system, custom separators, or visible page navigation buttons.
 
 </details>
 

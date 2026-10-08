@@ -17,26 +17,26 @@ function isProgressEntry(value: unknown): value is ProgressEntry {
 
 function parseData(value: unknown): FocusCardsPluginData {
   if (typeof value !== "object" || value === null) {
-    return { version: PLUGIN_DATA_VERSION, files: {} };
+    return { version: PLUGIN_DATA_VERSION, files: {}, allowNativeModes: false };
   }
-  const candidate = value as { version?: unknown; files?: unknown };
+  const candidate = value as { version?: unknown; files?: unknown; allowNativeModes?: unknown };
   if (
     candidate.version !== PLUGIN_DATA_VERSION ||
     typeof candidate.files !== "object" ||
     candidate.files === null
   ) {
-    return { version: PLUGIN_DATA_VERSION, files: {} };
+    return { version: PLUGIN_DATA_VERSION, files: {}, allowNativeModes: false };
   }
 
   const files: Record<string, ProgressEntry> = {};
   for (const [path, entry] of Object.entries(candidate.files)) {
     if (isProgressEntry(entry)) files[path] = { ...entry };
   }
-  return { version: PLUGIN_DATA_VERSION, files };
+  return { version: PLUGIN_DATA_VERSION, files, allowNativeModes: candidate.allowNativeModes === true };
 }
 
 export class ProgressStore {
-  private data: FocusCardsPluginData = { version: PLUGIN_DATA_VERSION, files: {} };
+  private data: FocusCardsPluginData = { version: PLUGIN_DATA_VERSION, files: {}, allowNativeModes: false };
   private writeQueue: Promise<void> = Promise.resolve();
 
   constructor(private readonly plugin: Plugin) {}
@@ -44,6 +44,13 @@ export class ProgressStore {
   async load(): Promise<void> {
     this.data = parseData(await this.plugin.loadData());
     this.prune();
+  }
+
+  get allowNativeModes(): boolean { return this.data.allowNativeModes; }
+
+  setAllowNativeModes(enabled: boolean): void {
+    this.data.allowNativeModes = enabled;
+    this.save();
   }
 
   get(path: string): ProgressEntry | undefined {
@@ -85,6 +92,7 @@ export class ProgressStore {
   private save(): void {
     const snapshot: FocusCardsPluginData = {
       version: PLUGIN_DATA_VERSION,
+      allowNativeModes: this.data.allowNativeModes,
       files: Object.fromEntries(
         Object.entries(this.data.files).map(([path, entry]) => [path, { ...entry }]),
       ),

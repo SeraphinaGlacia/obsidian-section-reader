@@ -20,6 +20,7 @@ describe("ProgressStore", () => {
   it("migrates progress when a file is renamed and removes it on deletion", async () => {
     const data: FocusCardsPluginData = {
       version: 1,
+      allowNativeModes: false,
       files: { "Old.md": { index: 2, cardKey: "key", updatedAt: 10 } },
     };
     const { plugin, saveData } = pluginWithData(data);
@@ -36,6 +37,24 @@ describe("ProgressStore", () => {
     await store.flush();
     expect(store.get("New.md")).toBeUndefined();
     expect(saveData).toHaveBeenCalledTimes(2);
+  });
+
+  it("defaults native mode switching off for old data and preserves it through progress writes", async () => {
+    const old = { version: 1, files: { "Note.md": { index: 1, cardKey: "old", updatedAt: 1 } } };
+    const { plugin, saveData } = pluginWithData(old);
+    const store = new ProgressStore(plugin);
+    await store.load();
+    expect(store.allowNativeModes).toBe(false);
+    expect(store.get("Note.md")?.index).toBe(1);
+    store.setAllowNativeModes(true);
+    store.set("Other.md", 2, "new");
+    await store.flush();
+    const saved: unknown = saveData.mock.lastCall?.[0];
+    const reloaded = new ProgressStore(pluginWithData(saved).plugin);
+    await reloaded.load();
+    expect(reloaded.allowNativeModes).toBe(true);
+    expect(reloaded.get("Note.md")?.index).toBe(1);
+    expect(reloaded.get("Other.md")?.index).toBe(2);
   });
 
   it("retains only the 500 most recently updated files", async () => {

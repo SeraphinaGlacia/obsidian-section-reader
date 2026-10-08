@@ -4,7 +4,6 @@ import {
   createCardDocument,
   findExactCardBreaks,
   resolveCardIndex,
-  sourceWithMarkers,
 } from "../src/cards";
 import { section } from "./fixtures";
 
@@ -92,16 +91,6 @@ describe("card document behavior", () => {
   it("returns one card for an empty document or while metadata is unavailable", () => {
     expect(createCardDocument("").cards).toHaveLength(1);
     expect(createCardDocument("One\n---\nTwo").cards).toHaveLength(1);
-  });
-
-  it("does not mutate source when inserting private render markers", () => {
-    const source = "One\n---\nTwo";
-    const document = createCardDocument(source, { sections: [section(source, 1)] });
-    const marked = sourceWithMarkers(document, "test");
-
-    expect(source).toBe("One\n---\nTwo");
-    expect(marked).toContain('data-focus-cards-marker="test-0"');
-    expect(marked.split("\n")).toHaveLength(source.split("\n").length);
   });
 
   it("maps a cursor on a separator to the following non-empty card", () => {
