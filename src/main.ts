@@ -19,11 +19,12 @@ class LegacyFocusView extends FileView {
     const file = this.file.path;
     const index = typeof state.cardIndex === "number" && Number.isInteger(state.cardIndex) && state.cardIndex >= 0
       ? state.cardIndex : undefined;
+    const key = typeof state.cardKey === "string" && state.cardKey.length > 0 ? state.cardKey : undefined;
     this.app.workspace.onLayoutReady(() => {
       window.setTimeout(() => {
         if (this.leaf.view !== this) return;
         void this.leaf.setViewState({ type: "markdown", state: { file, mode: "preview" } }).then(() => {
-          if (this.leaf.view instanceof MarkdownView) this.plugin.start(this.leaf.view, index);
+          if (this.leaf.view instanceof MarkdownView) this.plugin.start(this.leaf.view, index, key);
         });
       }, 0);
     });
@@ -106,9 +107,9 @@ export default class FocusCardsPlugin extends Plugin {
 
   notifyReadOnly(): void { new Notice(this.text.readOnlyNotice); }
 
-  start(view: MarkdownView, index?: number): void {
+  start(view: MarkdownView, index?: number, key?: string): void {
     if (this.stopping || this.sessions.has(view) || view.file === null) return;
-    const session = new FocusSession(view, this, index);
+    const session = new FocusSession(view, this, index, key);
     this.sessions.set(view, session);
     this.addChild(session);
   }
