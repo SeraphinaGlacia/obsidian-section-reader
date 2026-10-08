@@ -1,4 +1,4 @@
-# Native section focus in 0.3.0
+# Native section focus
 
 Tracking: [issue #8](https://github.com/SeraphinaGlacia/obsidian-section-reader/issues/8).
 
@@ -31,11 +31,11 @@ Native checks were performed on 2026-10-08 in a separate temporary vault on macO
 | New separators | Character-by-character input and pasted separators retain the editing region. Reading or explicit navigation applies the new split from the caret's section. Original delimiter spacing survives, and undo/redo restore the full source. |
 | Native rendering | Cross-section footnote and backreference navigation work; reference definitions resolve; checking a task changes its original source marker. A 100-section note reveals sections 51 and 100 in reading and editing. |
 | View lifecycle | Two tabs can focus different sections. External reading updates retain the focused content and allow subsequent navigation/editing. Renaming moves stored progress; deleting a focused note removes it. Disabling the plugin restores the native view. Legacy custom-view state restores as native Markdown focus. |
-| Reading scroll | Navigating away from a scrolled section and back restores its position through the native delayed scroll API. |
+| Card entry scroll | Entering, returning, native navigation, and reading/editing switches start at the card top. Manual scrolling after entry remains available. Saved progress retains the section only. |
 | Page transitions | Native reading and editing navigation produce horizontal outgoing/incoming animations without replacing the active editor or modifying source. Snapshot cleanup and reduced motion have automated coverage. |
 | Mobile emulation | Edge double-taps advance sections in both reading and editing. No pagination buttons are added. |
 
-Automated tests exercise live separator parsing, full-document coordinates, hidden-boundary deletion protection, selection confinement, external replacement, history navigation, session cleanup, reading scroll state, detached preview filtering, embedded view isolation, keyboard precedence, and mobile gesture guards. `pnpm run check` also checks both the current and minimum Obsidian API, lint, release guards, production build, and package consistency.
+Automated tests exercise live separator parsing, full-document coordinates, hidden-boundary deletion protection, selection confinement, external replacement, history navigation, session cleanup, card entry scrolling, detached preview filtering, embedded view isolation, keyboard precedence, and mobile gesture guards. `pnpm run check` also checks both the current and minimum Obsidian API, lint, release guards, production build, and package consistency.
 
 ## Post-merge review follow-up
 
@@ -48,6 +48,18 @@ The automated review of PR #9 completed at 12:47:13 UTC on 2026-10-08, after the
 | [Lost section key during legacy migration](https://github.com/SeraphinaGlacia/obsidian-section-reader/pull/9#discussion_r4219095089) | Carry the saved `cardKey` into the native focus session and resolve it against the current document. Inserting a preceding section restores the original content at its new index. Key-only states also restore correctly; removed keys and index-only states fall back to the saved index. |
 
 The native checks verify full-source preservation for all three areas. They use the actual plugin and native views; keyboard events are dispatched programmatically. These checks do not extend the physical-device or minimum-runtime coverage described below.
+
+## Scroll reset follow-up
+
+The 0.3.0 release could clip the first heading when entering a later section: its source-line scroll target included an offset left over from the full document. It also deliberately restored each card's previous scroll position. The updated behavior starts every entry at the top while preserving which section was selected.
+
+The session requests native scroll position zero once, after pending section filtering, native navigation, and mode changes. This lets the native renderer finish its layout before scrolling and prevents the original Outline/link target from overwriting the reset. Reading and editing use the same entry policy. Later layout refreshes and ordinary scrolling do not repeatedly reset the viewport, and exiting cancels the pending frame.
+
+The maintainer's report was reproduced with the installed 0.3.0 plugin: entering the ninth section scrolled 49 pixels and clipped its heading. A local copy in an isolated vault reproduced the issue with default styling. The copy and original note retained their original bytes; no private note contents are included in the repository. The isolated regression run passed 22 checks after the fix, compared with 6 before it, covering reading and editing entry, previous/next and repeated selection, native line navigation, mode switching, read-only entry, manual scrolling, cursor preservation, and the reported note layout.
+
+Another 23 native checks passed for toggle and navigation commands, heading links, rapid navigation, undo/redo across sections, both modes' horizontal animations and snapshot cleanup, and the first, middle, and last sections of a 100-section note. The configured `Ctrl+E` shortcut was also exercised in the test vault; the reported ninth section opened with its first heading fully visible.
+
+Eight mobile-emulation checks passed, including entry and left/right edge double-taps in both native modes, with the original source preserved. Physical-device coverage remains as described below. The complete local gate passed 102 unit tests, 70 release/package checks, both API typechecks, lint, and the production build.
 
 ## Maintainer acceptance before merge
 

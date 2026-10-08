@@ -29,11 +29,10 @@ export class FocusSession extends Component {
   private mode: string;
   private readonly counter: HTMLElement;
   private readonly gesture = new EdgeDoubleTapGesture();
-  private readonly scrollPositions = new Map<number, number>();
   private frame: number | null = null;
   private stopped = false;
   private lastSavedKey = "";
-  private restoreScroll = true;
+  private resetScroll = true;
   private composing = false;
   private returnMode: string | undefined;
   private readonly nativeModesEnabled: boolean;
@@ -145,9 +144,8 @@ export class FocusSession extends Component {
         this.view.getMode() === "source" || this.previewRoot()?.querySelector("[data-section-reader-block]:not(.section-reader-hidden)") != null,
       );
     }
-    this.rememberScroll();
     this.index = Math.max(0, Math.min(index, this.document.cards.length - 1));
-    this.restoreScroll = true;
+    this.resetScroll = true;
     this.syncEditor(offset ?? sectionRange(this.document, this.index).from);
     this.view.previewMode.rerender(true);
     this.applyPreview();
@@ -157,7 +155,7 @@ export class FocusSession extends Component {
 
   editorChanged(focus: EditorFocus): void {
     const changed = this.document !== focus.document || this.index !== focus.index;
-    if (this.document.cards.length !== focus.document.cards.length) this.scrollPositions.clear();
+    if (this.index !== focus.index) this.resetScroll = true;
     if (changed) this.previewBounds = undefined;
     this.document = focus.document;
     this.index = focus.index;
@@ -210,7 +208,7 @@ export class FocusSession extends Component {
         this.transition.cancel();
         if (this.mode === "source") this.finishEditing();
         this.mode = mode;
-        this.restoreScroll = true;
+        this.resetScroll = true;
         if (mode === "source") this.syncEditor();
         else this.view.previewMode.rerender(true);
       }
@@ -218,6 +216,13 @@ export class FocusSession extends Component {
       if (this.previewNeedsRerender && mode === "preview") {
         this.previewNeedsRerender = false;
         this.view.previewMode.rerender(true);
+      }
+      if (this.resetScroll) {
+        this.resetScroll = false;
+        // Run after native navigation and layout changes. Source-line offsets
+        // can land below the first block once preceding sections are hidden.
+        // The native API defers scrolling until the incoming view is ready.
+        this.view.setEphemeralState({ scroll: 0 });
       }
     });
   }
@@ -242,14 +247,6 @@ export class FocusSession extends Component {
     for (const element of preview.querySelectorAll<HTMLElement>("[data-section-reader-block]")) {
       const context = this.host.blocks.get(element);
       if (context !== undefined) this.filterPreviewBlock(element, context);
-    }
-    if (this.restoreScroll && this.view.getMode() === "preview") {
-      this.restoreScroll = false;
-      // Native ephemeral scroll waits for rendering; assigning scrollTop here is
-      // clamped back to zero while the incoming section is being rebuilt.
-      const scroll = this.scrollPositions.get(this.index) ??
-        lineAtOffset(this.document.source, sectionRange(this.document, this.index).from);
-      this.view.setEphemeralState({ scroll });
     }
   }
 
@@ -277,11 +274,6 @@ export class FocusSession extends Component {
     }
     const visible = info.lineEnd >= this.previewBounds.first && info.lineStart <= this.previewBounds.last;
     element.classList.toggle("section-reader-hidden", !visible);
-  }
-
-  private rememberScroll(): void {
-    const preview = this.previewRoot();
-    if (preview !== null && this.view.getMode() === "preview") this.scrollPositions.set(this.index, this.view.previewMode.getScroll());
   }
 
   private updateCounter(): void {
