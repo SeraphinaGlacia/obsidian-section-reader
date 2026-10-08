@@ -8,7 +8,7 @@ import { translationsForLanguage } from "../src/i18n";
 const source = "# One\n\nFirst\n\n---\n\n# Two\n\nSecond\n\n---\n\n# Three\n\nThird";
 let cleanup: (() => void) | undefined;
 
-function setup(mode = "preview") {
+function setup(mode = "preview", allowNativeModes = true) {
   const file = Object.assign(new TFile(), { path: "Note.md" });
   const contentEl = document.createElement("div");
   document.body.append(contentEl);
@@ -33,12 +33,14 @@ function setup(mode = "preview") {
     file, contentEl, containerEl: contentEl,
     app: { vault: { getFileByPath: () => file }, metadataCache: { getFileCache: () => ({}) }, workspace: { openLinkText: vi.fn() } },
     getViewData: () => source, getMode: () => mode,
+    getState: () => ({ file: file.path, mode }),
+    setState: vi.fn(async (state: { mode: string }) => { mode = state.mode; }),
     editor: { getCursor: () => ({ line: 0, ch: 0 }), posToOffset: () => 0 },
     previewMode: { containerEl: previewContainer, rerender: vi.fn(), getScroll: () => preview.scrollTop },
     setEphemeralState: originalNavigation,
   } as unknown as MarkdownView;
   const progress = { get: vi.fn(), set: vi.fn() };
-  const host = { text: translationsForLanguage("en"), progress, blocks, editorFor: () => undefined, stop: vi.fn() } as unknown as SessionHost;
+  const host = { text: translationsForLanguage("en"), progress, blocks, allowNativeModes, editorFor: () => undefined, stop: vi.fn(), notifyReadOnly: vi.fn() } as unknown as SessionHost;
   const session = new FocusSession(view, host);
   session.onload();
   vi.advanceTimersByTime(32);
@@ -68,6 +70,27 @@ afterEach(() => {
 });
 
 describe("section focus on a native view", () => {
+  it("locks native editing for the session and applies a setting change only after re-entry", async () => {
+    const { view, host } = setup("source", false);
+    expect(view.getMode()).toBe("preview");
+    await view.setState({ file: "Note.md", mode: "source" }, { history: false });
+    expect(view.getMode()).toBe("preview");
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Assert the callback without invoking it.
+    expect(host.notifyReadOnly).toHaveBeenCalledOnce();
+    host.allowNativeModes = true;
+    await view.setState({ file: "Note.md", mode: "source" }, { history: false });
+    expect(view.getMode()).toBe("preview");
+    cleanup?.(); cleanup = undefined;
+    expect(view.getMode()).toBe("source");
+    const next = new FocusSession(view, host);
+    next.onload(); cleanup = () => next.unload();
+    expect(view.getMode()).toBe("source");
+    host.allowNativeModes = false;
+    await view.setState({ file: "Note.md", mode: "preview" }, { history: false });
+    await view.setState({ file: "Note.md", mode: "source" }, { history: false });
+    expect(view.getMode()).toBe("source");
+  });
+
   it("keeps focus independent of the native mode and removes it cleanly", () => {
     const { view, session, elements, setMode, originalNavigation } = setup();
     session.navigate(1);

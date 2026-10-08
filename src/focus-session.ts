@@ -1,5 +1,5 @@
 import { Component, Platform, parseLinktext, resolveSubpath } from "obsidian";
-import type { MarkdownPostProcessorContext, MarkdownView, TFile } from "obsidian";
+import type { MarkdownPostProcessorContext, MarkdownView, TFile, ViewStateResult } from "obsidian";
 import type { EditorView } from "@codemirror/view";
 import { resolveCardIndex } from "./cards";
 import type { CardDocument } from "./cards";
@@ -16,8 +16,10 @@ export interface SessionHost {
   text: Translations;
   progress: ProgressStore;
   blocks: WeakMap<HTMLElement, MarkdownPostProcessorContext>;
+  allowNativeModes: boolean;
   editorFor(view: MarkdownView): EditorView | undefined;
   stop(view: MarkdownView): void;
+  notifyReadOnly(): void;
 }
 
 export class FocusSession extends Component {
@@ -33,6 +35,8 @@ export class FocusSession extends Component {
   private lastSavedKey = "";
   private restoreScroll = true;
   private composing = false;
+  private returnMode: string | undefined;
+  private readonly nativeModesEnabled: boolean;
   private previewBounds: { source: string; index: number; first: number; last: number } | undefined;
   private previewDocumentId: string | undefined;
   private previewNeedsRerender = false;
@@ -41,6 +45,7 @@ export class FocusSession extends Component {
   constructor(readonly view: MarkdownView, private readonly host: SessionHost, initialIndex?: number) {
     super();
     this.file = view.file!;
+    this.nativeModesEnabled = host.allowNativeModes;
     this.transition = new SectionTransition(view.contentEl);
     this.document = parseSectionDocument(view.getViewData());
     const saved = host.progress.get(this.file.path);
@@ -79,7 +84,21 @@ export class FocusSession extends Component {
     };
     view.setEphemeralState = navigate;
     this.register(() => { if (view.setEphemeralState === navigate) view.setEphemeralState = original; });
+    // Guard the public state entry point used by native mode controls.
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Restore the host method identity on cleanup.
+    const originalSetState = view.setState;
+    const setState = async (state: Record<string, unknown>, result: ViewStateResult): Promise<void> => {
+      if (!this.stopped && !this.nativeModesEnabled && state.mode === "source" &&
+        (state.file === undefined || state.file === this.file.path)) {
+        this.host.notifyReadOnly();
+        state = { ...state, mode: "preview" };
+      }
+      await originalSetState.call(view, state, result);
+    };
+    view.setState = setState;
+    this.register(() => { if (view.setState === setState) view.setState = originalSetState; });
     this.syncEditor();
+    this.refreshModePolicy();
     this.previewRoot()?.classList.add("section-reader-preview");
     view.previewMode.rerender(true);
     this.applyPreview();
@@ -101,6 +120,10 @@ export class FocusSession extends Component {
     preview?.classList.remove("section-reader-preview");
     preview?.querySelectorAll(".section-reader-hidden").forEach((element) => element.classList.remove("section-reader-hidden"));
     this.view.previewMode.rerender(true);
+    if (this.returnMode === "source" && this.view.file === this.file &&
+      this.view.app.vault.getFileByPath(this.file.path) === this.file) {
+      void this.view.setState({ ...this.view.getState(), mode: "source" }, { history: false });
+    }
   }
 
   navigate(direction: -1 | 1): boolean {
@@ -161,11 +184,25 @@ export class FocusSession extends Component {
     if (editor !== undefined) finishFocusedEditing(editor);
   }
 
+  private refreshModePolicy(): void {
+    if (this.nativeModesEnabled) return;
+    this.returnMode ??= this.view.getMode();
+    if (this.view.getMode() === "source") {
+      this.finishEditing();
+      void this.view.setState({ ...this.view.getState(), mode: "preview" }, { history: false });
+    }
+    this.schedule();
+  }
+
   schedule(): void {
     if (this.stopped || this.frame !== null) return;
     this.frame = this.view.containerEl.ownerDocument.defaultView!.requestAnimationFrame(() => {
       this.frame = null;
       if (this.view.file !== this.file) return;
+      if (!this.nativeModesEnabled && this.view.getMode() === "source") {
+        this.refreshModePolicy();
+        return;
+      }
       const mode = this.view.getMode();
       if (mode !== this.mode) {
         this.transition.cancel();

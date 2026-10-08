@@ -1,4 +1,4 @@
-import { FileView, MarkdownView, Plugin, TFile, getLanguage } from "obsidian";
+import { FileView, MarkdownView, Notice, Plugin, TFile, getLanguage } from "obsidian";
 import type { MarkdownFileInfo, MarkdownPostProcessorContext, ViewStateResult, WorkspaceLeaf } from "obsidian";
 import type { EditorView } from "@codemirror/view";
 import { VIEW_TYPE_FOCUS_CARDS } from "./constants";
@@ -6,6 +6,7 @@ import { focusEditorExtension } from "./focus-editor";
 import { FocusSession } from "./focus-session";
 import { translationsForLanguage } from "./i18n";
 import { ProgressStore } from "./progress-store";
+import { SectionReaderSettingTab } from "./settings-tab";
 
 /** Loads saved pre-0.3 tabs and hands them back to the native Markdown view. */
 class LegacyFocusView extends FileView {
@@ -39,6 +40,7 @@ export default class FocusCardsPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.progress.load();
+    this.addSettingTab(new SectionReaderSettingTab(this));
     this.registerView(VIEW_TYPE_FOCUS_CARDS, (leaf) => new LegacyFocusView(leaf, this));
     this.registerEditorExtension(focusEditorExtension({
       attach: (info, editor) => {
@@ -95,6 +97,14 @@ export default class FocusCardsPlugin extends Plugin {
   }
 
   editorFor(view: MarkdownView): EditorView | undefined { return this.editors.get(view); }
+
+  get allowNativeModes(): boolean { return this.progress.allowNativeModes; }
+
+  setAllowNativeModes(enabled: boolean): void {
+    this.progress.setAllowNativeModes(enabled);
+  }
+
+  notifyReadOnly(): void { new Notice(this.text.readOnlyNotice); }
 
   start(view: MarkdownView, index?: number): void {
     if (this.stopping || this.sessions.has(view) || view.file === null) return;

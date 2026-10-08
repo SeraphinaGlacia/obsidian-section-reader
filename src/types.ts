@@ -7,4 +7,5 @@ export interface ProgressEntry {
 export interface FocusCardsPluginData {
   version: 1;
   files: Record<string, ProgressEntry>;
+  allowNativeModes: boolean;
 }

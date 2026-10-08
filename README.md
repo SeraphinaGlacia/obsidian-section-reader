@@ -8,7 +8,7 @@
 
 > Read and edit long notes one section at a time, without splitting files.
 
-Section Reader adds section focus to Obsidian's native Markdown view. Sections separated by root-level `---` lines appear one at a time, while the complete note stays in its original file. Keep section focus on as you switch between native Reading view and Editing view, including Live Preview and Source mode. Native links, embeds, task interactions, and reading progress remain available. Browsing does not change your Markdown; editing and task checkbox actions save through Obsidian.
+Section Reader adds section focus to Obsidian's native Markdown view. Sections separated by root-level `---` lines appear one at a time, while the complete note stays in its original file. Enable native mode switching in settings to switch between Reading view and Editing view, including Live Preview and Source mode, without leaving section focus. Native links, embeds, task interactions, and reading progress remain available. Browsing does not change your Markdown; editing and task checkbox actions save through Obsidian.
 
 Requires **Obsidian 1.8.7 or later**, for desktop and mobile.
 
@@ -95,7 +95,7 @@ Total assets stay the same: equipment increases while cash decreases.
 ```
 
 - **Enter and exit:** Click the “Toggle Section Reader” ribbon icon, or run “Toggle section focus”. Trigger it again to show the full note. In Reading view, `Esc` also exits focus; in Editing view, `Esc` keeps its native behavior.
-- **Read and edit:** Use Obsidian's native “Toggle reading view” command or view control. Section focus stays enabled and keeps the current section. The focus toggle and reading/editing toggle are independent; neither changes your configured shortcuts.
+- **Read and edit:** Enable “Allow native reading/editing mode switching” in Section Reader settings, then exit and re-enter Section Reader. You can use Obsidian's native reading/editing command or view control while keeping the current section. With the setting off, Section Reader stays read-only until you exit. Setting changes apply only on re-entry; configured shortcuts stay unchanged.
 - **Turn pages:** In desktop Reading view, click the note and use `←` / `→`. In Editing view, these keys always belong to the editor; assign your own shortcuts to “Previous section” and “Next section” for navigation. On mobile, double-tap the left / right window edge in either mode. There are no added pagination buttons or toolbar controls. Selection, dragging, composition, and interactive controls take precedence over navigation.
 - **Jump and resume:** The Outline and same-note heading, block, and footnote links reveal the destination section. Entering focus from Editing view starts at the cursor; entering from Reading view resumes saved progress. Closing a tab ends its focus session but preserves progress.
 - **Quick access:** Configure your own hotkeys under “Settings → Hotkeys”. On mobile, the focus toggle can use Obsidian's ribbon or Quick Action; use the native reading/editing control for mode changes. No default hotkeys are assigned.
