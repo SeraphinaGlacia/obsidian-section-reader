@@ -19,7 +19,6 @@ export interface SessionHost {
   allowNativeModes: boolean;
   editorFor(view: MarkdownView): EditorView | undefined;
   stop(view: MarkdownView): void;
-  notifyReadOnly(): void;
 }
 
 export class FocusSession extends Component {
@@ -91,7 +90,6 @@ export class FocusSession extends Component {
     const setState = async (state: Record<string, unknown>, result: ViewStateResult): Promise<void> => {
       if (!this.stopped && !this.nativeModesEnabled && state.mode === "source" &&
         (state.file === undefined || state.file === this.file.path)) {
-        this.host.notifyReadOnly();
         state = { ...state, mode: "preview" };
       }
       await originalSetState.call(view, state, result);

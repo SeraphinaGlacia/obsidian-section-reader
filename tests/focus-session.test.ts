@@ -43,7 +43,7 @@ function setup(mode = "preview", allowNativeModes = true, initial?: { index?: nu
     setEphemeralState: originalNavigation,
   } as unknown as MarkdownView;
   const progress = { get: vi.fn(), set: vi.fn() };
-  const host = { text: translationsForLanguage("en"), progress, blocks, allowNativeModes, editorFor: () => undefined, stop: vi.fn(), notifyReadOnly: vi.fn() } as unknown as SessionHost;
+  const host = { text: translationsForLanguage("en"), progress, blocks, allowNativeModes, editorFor: () => undefined, stop: vi.fn() } as unknown as SessionHost;
   const session = new FocusSession(view, host, initial?.index, initial?.key);
   session.onload();
   vi.advanceTimersByTime(32);
@@ -90,8 +90,6 @@ describe("section focus on a native view", () => {
     expect(view.getMode()).toBe("preview");
     await view.setState({ file: "Note.md", mode: "source" }, { history: false });
     expect(view.getMode()).toBe("preview");
-    // eslint-disable-next-line @typescript-eslint/unbound-method -- Assert the callback without invoking it.
-    expect(host.notifyReadOnly).toHaveBeenCalledOnce();
     host.allowNativeModes = true;
     await view.setState({ file: "Note.md", mode: "source" }, { history: false });
     expect(view.getMode()).toBe("preview");
