@@ -1,4 +1,4 @@
-import { FileView, MarkdownView, Notice, Plugin, TFile, getLanguage } from "obsidian";
+import { FileView, MarkdownView, Plugin, TFile, getLanguage } from "obsidian";
 import type { MarkdownFileInfo, MarkdownPostProcessorContext, ViewStateResult, WorkspaceLeaf } from "obsidian";
 import type { EditorView } from "@codemirror/view";
 import { VIEW_TYPE_FOCUS_CARDS } from "./constants";
@@ -104,8 +104,6 @@ export default class FocusCardsPlugin extends Plugin {
   setAllowNativeModes(enabled: boolean): void {
     this.progress.setAllowNativeModes(enabled);
   }
-
-  notifyReadOnly(): void { new Notice(this.text.readOnlyNotice); }
 
   start(view: MarkdownView, index?: number, key?: string): void {
     if (this.stopping || this.sessions.has(view) || view.file === null) return;

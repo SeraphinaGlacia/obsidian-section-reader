@@ -9,13 +9,14 @@ import { parseSectionDocument } from "../src/section-document";
 const source = "# One\n\nFirst\n\n---\n\n# Two\n\nSecond\n\n---\n\n# Three\n\nThird";
 let cleanup: (() => void) | undefined;
 
-function setup(mode = "preview", allowNativeModes = true, initial?: { index?: number; key?: string }) {
+function setup(mode = "preview", allowNativeModes = true, initial?: { index?: number; key?: string; scroll?: number }) {
   const file = Object.assign(new TFile(), { path: "Note.md" });
   const contentEl = document.createElement("div");
   document.body.append(contentEl);
   const previewContainer = document.createElement("div");
   const preview = document.createElement("div");
   preview.className = "markdown-preview-view";
+  preview.scrollTop = initial?.scroll ?? 0;
   previewContainer.append(preview);
   contentEl.append(previewContainer);
   const blocks = new WeakMap<HTMLElement, MarkdownPostProcessorContext>();
@@ -27,8 +28,9 @@ function setup(mode = "preview", allowNativeModes = true, initial?: { index?: nu
     blocks.set(el, { docId: "native-preview", sourcePath: file.path, getSectionInfo: () => ({ lineStart: line, lineEnd: line + 2, text: source }) } as unknown as MarkdownPostProcessorContext);
     return el;
   });
-  const originalNavigation = vi.fn((state: { scroll?: number }) => {
+  const originalNavigation = vi.fn((state: { scroll?: number; line?: number }) => {
     if (state.scroll !== undefined) preview.scrollTop = state.scroll;
+    if (state.line !== undefined) preview.scrollTop = 200;
   });
   const view = {
     file, contentEl, containerEl: contentEl,
@@ -41,7 +43,7 @@ function setup(mode = "preview", allowNativeModes = true, initial?: { index?: nu
     setEphemeralState: originalNavigation,
   } as unknown as MarkdownView;
   const progress = { get: vi.fn(), set: vi.fn() };
-  const host = { text: translationsForLanguage("en"), progress, blocks, allowNativeModes, editorFor: () => undefined, stop: vi.fn(), notifyReadOnly: vi.fn() } as unknown as SessionHost;
+  const host = { text: translationsForLanguage("en"), progress, blocks, allowNativeModes, editorFor: () => undefined, stop: vi.fn() } as unknown as SessionHost;
   const session = new FocusSession(view, host, initial?.index, initial?.key);
   session.onload();
   vi.advanceTimersByTime(32);
@@ -88,8 +90,6 @@ describe("section focus on a native view", () => {
     expect(view.getMode()).toBe("preview");
     await view.setState({ file: "Note.md", mode: "source" }, { history: false });
     expect(view.getMode()).toBe("preview");
-    // eslint-disable-next-line @typescript-eslint/unbound-method -- Assert the callback without invoking it.
-    expect(host.notifyReadOnly).toHaveBeenCalledOnce();
     host.allowNativeModes = true;
     await view.setState({ file: "Note.md", mode: "source" }, { history: false });
     expect(view.getMode()).toBe("preview");
@@ -163,13 +163,16 @@ describe("section focus on a native view", () => {
   });
 
   it.each(["source", "preview"])("retains edge double-taps in %s without pagination controls", (mode) => {
-    const { contentEl, session } = setup(mode);
+    const { contentEl, session, preview } = setup(mode);
     Object.assign(Platform, { isMobile: true });
     vi.spyOn(contentEl, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 400, 800));
     const editor = document.createElement("div"); editor.className = "cm-content"; editor.setAttribute("contenteditable", "true"); contentEl.append(editor);
     const target = mode === "source" ? editor : contentEl;
+    preview.scrollTop = 125;
     tap(target); expect(session.index).toBe(0);
     tap(target); expect(session.index).toBe(1);
+    vi.advanceTimersByTime(32);
+    expect(preview.scrollTop).toBe(0);
     expect(contentEl.querySelector("button")).toBeNull();
     contentEl.dispatchEvent(new CompositionEvent("compositionstart"));
     tap(target); tap(target); expect(session.index).toBe(1);
@@ -186,13 +189,50 @@ describe("section focus on a native view", () => {
     expect(originalNavigation).toHaveBeenCalledWith({ line: 14 });
   });
 
-  it("retains reading scroll separately for each section", () => {
-    const { session, preview } = setup();
+  it.each(["preview", "source"])("starts a restored section at the top in %s", (mode) => {
+    const { preview, session } = setup(mode, true, { index: 2, scroll: 125 });
+    expect(session.index).toBe(2);
+    expect(preview.scrollTop).toBe(0);
+  });
+
+  it.each(["source", "preview"])("starts every section at the top in %s, including returning and reselecting", (mode) => {
+    const { session, preview } = setup(mode);
+    for (const index of [1, 0, 1, 1, 2]) {
+      preview.scrollTop = 125;
+      session.select(index);
+      vi.advanceTimersByTime(32);
+      expect(preview.scrollTop).toBe(0);
+    }
+  });
+
+  it("resets after native navigation has applied its target scroll", () => {
+    const { view, session, preview } = setup();
+    view.setEphemeralState({ line: 14 });
+    vi.advanceTimersByTime(32);
+    expect(session.index).toBe(2);
+    expect(preview.scrollTop).toBe(0);
+  });
+
+  it("starts at the top after switching native modes", () => {
+    const { preview, setMode } = setup();
+    for (const mode of ["source", "preview", "source"]) {
+      preview.scrollTop = 125;
+      setMode(mode);
+      expect(preview.scrollTop).toBe(0);
+    }
+  });
+
+  it("leaves manual scrolling alone after entry and cancels a pending reset on exit", () => {
+    const { preview, session } = setup();
     preview.scrollTop = 125;
-    session.navigate(1); expect(preview.scrollTop).toBe(6);
-    preview.scrollTop = 45;
-    session.navigate(-1); expect(preview.scrollTop).toBe(125);
-    session.navigate(1); expect(preview.scrollTop).toBe(45);
+    session.schedule();
+    vi.advanceTimersByTime(100);
+    expect(preview.scrollTop).toBe(125);
+    session.select(1);
+    cleanup?.(); cleanup = undefined;
+    preview.scrollTop = 200;
+    vi.advanceTimersByTime(100);
+    expect(preview.scrollTop).toBe(200);
   });
 
   it("does not filter a nested embed as though it belonged to the parent note", () => {

@@ -97,7 +97,7 @@ Total assets stay the same: equipment increases while cash decreases.
 - **Enter and exit:** Click the “Toggle Section Reader” ribbon icon, or run “Toggle section focus”. Trigger it again to show the full note. In Reading view, `Esc` also exits focus; in Editing view, `Esc` keeps its native behavior.
 - **Read and edit:** Enable “Allow native reading/editing mode switching” in Section Reader settings, then exit and re-enter Section Reader. You can use Obsidian's native reading/editing command or view control while keeping the current section. With the setting off, Section Reader stays read-only until you exit. Setting changes apply only on re-entry; configured shortcuts stay unchanged.
 - **Turn pages:** In desktop Reading view, click the note and use `←` / `→`. In Editing view, these keys always belong to the editor; assign your own shortcuts to “Previous section” and “Next section” for navigation. On mobile, double-tap the left / right window edge in either mode. There are no added pagination buttons or toolbar controls. Selection, dragging, composition, and interactive controls take precedence over navigation.
-- **Jump and resume:** The Outline and same-note heading, block, and footnote links reveal the destination section. Entering focus from Editing view starts at the cursor; entering from Reading view resumes saved progress. Closing a tab ends its focus session but preserves progress.
+- **Jump and resume:** The Outline and same-note heading, block, and footnote links reveal the destination section. Entering focus from Editing view selects the cursor's section; entering from Reading view resumes the saved section. Each entry, section navigation, and reading/editing switch starts at the top of the card. Closing a tab ends its focus session but preserves the saved section.
 - **Quick access:** Configure your own hotkeys under “Settings → Hotkeys”. On mobile, the focus toggle can use Obsidian's ribbon or Quick Action; use the native reading/editing control for mode changes. No default hotkeys are assigned.
 
 ## 3.3 Commands
@@ -147,7 +147,7 @@ Therefore, identical-looking text in YAML frontmatter, code blocks, blockquotes,
 
 - The native Markdown view retains the full document. Reading-view blocks are filtered by their original source lines, preserving context for footnotes, reference definitions, links, embeds, and task interactions. Editing uses the native CodeMirror editor with sections outside the focus hidden.
 - Cards follow the normal Markdown view's readable line length and margin settings, and do not extend to either edge of the desktop window.
-- In Reading view, each card can scroll vertically on its own; its scroll position is retained when you return during the same browsing session.
+- Each card can scroll vertically. Entering or returning to a card starts at its top in both native modes; the saved progress remembers the section, without retaining its scroll position.
 - In Reading view, internal links to other notes open in a new tab in the normal Markdown view, while the original tab stays in focus mode. Heading and block links within the same note navigate in the current card view; clicking with a modifier key can still open them in a new tab.
 - On desktop, internal-link hover previews are handled through Obsidian's native Page preview events. With Hover Editor enabled, the same interactive preview popovers are available in card mode.
 - Browsing does not modify Markdown. Text edits, templates, and task checkbox changes use the original file through the native editor and renderer.
