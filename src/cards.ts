@@ -164,13 +164,3 @@ export function resolveCardIndex(document: CardDocument, preferredIndex: number,
   }
   return Math.min(Math.max(0, preferredIndex), document.cards.length - 1);
 }
-
-export function sourceWithMarkers(document: CardDocument, markerPrefix: string): string {
-  let marked = document.source;
-  for (let index = document.breaks.length - 1; index >= 0; index -= 1) {
-    const cardBreak = document.breaks[index]!;
-    const marker = `<hr data-focus-cards-marker="${markerPrefix}-${index}">`;
-    marked = `${marked.slice(0, cardBreak.start)}${marker}${marked.slice(cardBreak.end)}`;
-  }
-  return marked;
-}

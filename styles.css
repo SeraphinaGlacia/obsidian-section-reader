@@ -1,85 +1,47 @@
-.workspace-leaf-content > .view-content.focus-cards-view {
+.view-content.section-reader-focus {
   position: relative;
   overflow: hidden;
-  padding: 0;
-  background: var(--background-primary);
-  color: var(--text-normal);
 }
 
-.focus-cards-view .focus-cards-shell {
+.section-reader-transition {
   position: absolute;
   inset: 0;
+  z-index: 3;
   overflow: hidden;
-  background: inherit;
-}
-
-.focus-cards-view .focus-cards-viewport {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  outline: none;
-  touch-action: manipulation;
-}
-
-.focus-cards-view .focus-cards-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition-property: transform;
-  transition-duration: var(--focus-cards-transition-duration, 0ms);
-  transition-timing-function: cubic-bezier(0.22, 0.8, 0.3, 1);
-  will-change: transform;
-}
-
-.focus-cards-view .focus-cards-card {
-  box-sizing: border-box;
-  flex: 0 0 100%;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scrollbar-gutter: stable;
   background: var(--background-primary);
-  color: var(--text-normal);
+  pointer-events: none;
+  user-select: none;
 }
 
-.focus-cards-view .focus-cards-card-sizer {
-  box-sizing: border-box;
-  min-height: 100%;
+.section-reader-transition > * {
+  width: 100%;
+  height: 100%;
 }
 
-.focus-cards-view .focus-cards-card-content {
-  box-sizing: border-box;
-  min-height: 1px;
-  padding-bottom: calc(
-    var(--size-4-16, 64px) + env(safe-area-inset-bottom, 0px)
-  );
+.section-reader-transition .cm-cursor {
+  visibility: hidden;
 }
 
-.focus-cards-view .focus-cards-card-content .metadata-container,
-.focus-cards-view .focus-cards-card-content .frontmatter,
-.focus-cards-view .focus-cards-card-content [data-focus-cards-marker] {
+.section-reader-preview > .markdown-preview-sizer > .section-reader-hidden,
+.section-reader-preview > .markdown-preview-sizer > .mod-header,
+.section-reader-preview > .markdown-preview-sizer > .mod-frontmatter {
   display: none;
 }
 
-.focus-cards-view .focus-cards-card pre,
-.focus-cards-view .focus-cards-card .table-wrapper {
-  overflow-x: auto;
-  touch-action: pan-x pan-y;
+.section-reader-focus > .markdown-source-view > .cm-editor > .cm-scroller > .cm-sizer > .inline-title,
+.section-reader-focus > .markdown-source-view > .cm-editor > .cm-scroller > .cm-sizer > .metadata-container {
+  display: none;
 }
 
-.focus-cards-view .focus-cards-card:focus-visible {
-  outline: 2px solid var(--interactive-accent);
-  outline-offset: -2px;
+.section-reader-focus .cm-content > .cm-line.section-reader-hidden-boundary {
+  display: none;
 }
 
-.focus-cards-view .focus-cards-counter {
+.section-reader-counter {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   right: max(var(--size-4-4, 16px), env(safe-area-inset-right, 0px));
-  bottom: calc(var(--size-4-3, 12px) + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--size-4-8, 32px) + env(safe-area-inset-bottom, 0px));
   min-width: 3.25em;
   box-sizing: border-box;
   padding: var(--size-2-1, 4px) var(--size-4-2, 8px);
@@ -94,16 +56,4 @@
   text-align: center;
   pointer-events: none;
   user-select: none;
-}
-
-.focus-cards-view .focus-cards-error {
-  box-sizing: border-box;
-  padding: var(--size-4-6);
-  color: var(--text-error);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .focus-cards-view .focus-cards-track {
-    transition-duration: 0ms;
-  }
 }

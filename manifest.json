@@ -1,9 +1,9 @@
 {
   "id": "section-reader",
   "name": "Section Reader",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "minAppVersion": "1.8.7",
-  "description": "Read long notes one section at a time, without splitting files.",
+  "description": "Read and edit long notes one section at a time, without splitting files.",
   "author": "SeraphinaGlacia",
   "authorUrl": "https://github.com/SeraphinaGlacia",
   "isDesktopOnly": false

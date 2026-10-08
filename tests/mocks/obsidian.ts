@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { StateField } from "@codemirror/state";
 import type { App, CachedMetadata, TFile as ObsidianFile, WorkspaceLeaf } from "obsidian";
 
 export class TFile {
@@ -15,6 +16,7 @@ export class Component {
   }
 
   addChild<T extends Component>(child: T): T {
+    child.onload();
     return child;
   }
 
@@ -23,13 +25,17 @@ export class Component {
     return child;
   }
 
+  onload(): void { /* Host lifecycle hook. */ }
+  onunload(): void { /* Host lifecycle hook. */ }
+
   unload(): void {
+    this.onunload();
     this.cleanups.splice(0).forEach((cleanup) => cleanup());
   }
 
-  registerDomEvent(element: HTMLElement, type: string, handler: EventListener): void {
-    element.addEventListener(type, handler);
-    this.register(() => element.removeEventListener(type, handler));
+  registerDomEvent(element: HTMLElement, type: string, handler: EventListener, options?: boolean): void {
+    element.addEventListener(type, handler, options);
+    this.register(() => element.removeEventListener(type, handler, options));
   }
 }
 
@@ -65,6 +71,7 @@ export class Scope {
 }
 
 export const Platform = { isMobile: false, isMobileApp: false };
+export const editorInfoField = StateField.define({ create: () => ({ file: null }), update: (value) => value });
 export const getFrontMatterInfo = (): { exists: boolean; contentStart: number } => ({
   exists: false, contentStart: 0,
 });

@@ -2,18 +2,18 @@ const translations = {
   en: {
     viewName: "Section Reader",
     ribbon: "Toggle Section Reader",
-    toggle: "Toggle card browsing mode",
-    next: "Next card",
-    previous: "Previous card",
-    cardLabel: (current: number, total: number): string => `Card ${current} of ${total}`,
+    toggle: "Toggle section focus",
+    next: "Next section",
+    previous: "Previous section",
+    cardLabel: (current: number, total: number): string => `Section ${current} of ${total}`,
   },
   zh: {
     viewName: "Section Reader",
     ribbon: "切换 Section Reader",
-    toggle: "切换卡片浏览模式",
-    next: "下一张卡片",
-    previous: "上一张卡片",
-    cardLabel: (current: number, total: number): string => `第 ${current} 张，共 ${total} 张`,
+    toggle: "切换分节聚焦",
+    next: "下一节",
+    previous: "上一节",
+    cardLabel: (current: number, total: number): string => `第 ${current} 节，共 ${total} 节`,
   },
 } as const;
 
