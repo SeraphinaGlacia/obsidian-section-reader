@@ -5,7 +5,7 @@ export function eventElement(target: EventTarget | null): Element | null {
 
 export function isInteractiveTarget(target: EventTarget | null): boolean {
   return eventElement(target)?.closest(
-    "a, button, input, textarea, select, option, [contenteditable='true'], pre, code, .table-wrapper",
+    "a, button, input, textarea, select, option, [contenteditable='true'], pre, code, table, .table-wrapper",
   ) != null;
 }
 

@@ -291,9 +291,10 @@ export class FocusSession extends Component {
 
   private handleKey(event: KeyboardEvent): void {
     if (this.view.getMode() !== "preview" || event.defaultPrevented || event.isComposing ||
-      event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || isInteractiveTarget(event.target) ||
-      hasActiveTextSelection(this.view.containerEl.ownerDocument.defaultView!.getSelection())) return;
+      event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      if (isInteractiveTarget(event.target) ||
+        hasActiveTextSelection(this.view.containerEl.ownerDocument.defaultView!.getSelection())) return;
       this.navigate(event.key === "ArrowLeft" ? -1 : 1);
     } else if (event.key === "Escape") this.host.stop(this.view);
     else return;

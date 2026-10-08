@@ -130,6 +130,25 @@ describe("section focus on a native view", () => {
     expect(session.index).toBe(1);
   });
 
+  it("exits reading focus with Escape while text is selected", () => {
+    const { view, host, contentEl, elements } = setup();
+    const stop = vi.fn(); host.stop = stop;
+    const range = document.createRange(); range.selectNodeContents(elements[0]!);
+    window.getSelection()?.addRange(range);
+    expect(key(contentEl, "ArrowRight").defaultPrevented).toBe(false);
+    expect(key(contentEl, "Escape").defaultPrevented).toBe(true);
+    expect(stop).toHaveBeenCalledWith(view);
+  });
+
+  it.each(["a", "input", "button", "pre", "table"])("exits reading focus with Escape from %s", (tag) => {
+    const { view, host, contentEl } = setup();
+    const stop = vi.fn(); host.stop = stop;
+    const target = document.createElement(tag); contentEl.append(target);
+    expect(key(target, "ArrowRight").defaultPrevented).toBe(false);
+    expect(key(target, "Escape").defaultPrevented).toBe(true);
+    expect(stop).toHaveBeenCalledWith(view);
+  });
+
   it.each(["source", "preview"])("retains edge double-taps in %s without pagination controls", (mode) => {
     const { contentEl, session } = setup(mode);
     Object.assign(Platform, { isMobile: true });
