@@ -33,7 +33,8 @@
   display: none;
 }
 
-.section-reader-focus .cm-content > .cm-line.section-reader-hidden-boundary {
+.section-reader-focus .cm-content > .cm-line.section-reader-hidden-boundary,
+.section-reader-focus .cm-content > .section-reader-prefix-mask + .hr {
   display: none;
 }
 

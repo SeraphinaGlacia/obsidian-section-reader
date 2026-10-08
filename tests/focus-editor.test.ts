@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EditorState, Transaction } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { editorFocusField, focusTransactionFilter, setEditorFocus } from "../src/focus-editor";
+import { editorFocusField, finishFocusedEditing, focusTransactionFilter, setEditorFocus } from "../src/focus-editor";
 
 const source = "# One\n\nFirst apple\n\n---\n\n# Two\n\nSecond apple\n\n---\n\n# Three\n\nLast apple";
 function editor(index = 1): EditorState {
@@ -71,11 +71,49 @@ describe("native editor section focus", () => {
     expect(changed.field(editorFocusField)!.document.cards[2]!.source).toContain("Second");
   });
 
-  it("recomputes boundaries immediately when typing a new separator", () => {
+  it("defers new separators until explicit navigation so typing does not change cards", () => {
     const state = editor();
     const position = source.indexOf("Second");
     const changed = state.update({ changes: { from: position, insert: "Extra\n\n---\n\n" }, userEvent: "input.type" }).state;
-    expect(changed.field(editorFocusField)!.document.cards).toHaveLength(4);
+    expect(changed.field(editorFocusField)!.document.cards).toHaveLength(3);
+    expect(changed.doc.toString()).toContain("Extra\n\n---\n\nSecond");
+    const committed = changed.update({ effects: setEditorFocus.of(1) }).state;
+    expect(committed.field(editorFocusField)!.document.cards).toHaveLength(4);
+  });
+
+  it("lets a new trailing section be typed continuously and reveals it when editing finishes", () => {
+    const view = new EditorView({ state: editor() });
+    try {
+      const end = view.state.field(editorFocusField)!.range.to;
+      view.dispatch({ selection: { anchor: end } });
+      const text = "\n\n---\n\nNew paragraph";
+      for (const character of text) {
+        const cursor = view.state.selection.main.head;
+        view.dispatch({ changes: { from: cursor, insert: character }, selection: { anchor: cursor + 1 }, userEvent: "input.type" });
+        expect(view.state.field(editorFocusField)!.index).toBe(1);
+        expect(view.state.field(editorFocusField)!.document.cards).toHaveLength(3);
+      }
+      expect(view.state.selection.main.head).toBe(end + text.length);
+      finishFocusedEditing(view);
+      expect(view.state.field(editorFocusField)!.document.cards).toHaveLength(4);
+      expect(view.state.field(editorFocusField)!.index).toBe(2);
+      expect(view.contentDOM.textContent).toContain("New paragraph");
+      expect(view.contentDOM.textContent).not.toContain("Second apple");
+      expect(view.state.doc.toString()).toBe(source.slice(0, end) + text + source.slice(end));
+    } finally { view.destroy(); }
+  });
+
+  it.each(["", "\n", "\n\n\n"])("masks the previous section's separator before later headings (gap %j)", (gap) => {
+    const text = "# One\n\nBody\n\n---\n" + gap + "# Two\n\nBody\n\n---\n" + gap + "# Three";
+    for (const index of [1, 2]) {
+      const state = EditorState.create({ doc: text, extensions: [editorFocusField, focusTransactionFilter] });
+      const view = new EditorView({ state: state.update({ effects: setEditorFocus.of(index) }).state });
+      try {
+        const lines = [...view.contentDOM.querySelectorAll(".cm-line:not(.section-reader-hidden-boundary)")];
+        expect(lines[0]?.textContent).toBe(index === 1 ? "# Two" : "# Three");
+        expect(view.state.doc.toString()).toBe(text);
+      } finally { view.destroy(); }
+    }
   });
 
   it("retains the focused section when a sync update replaces the entire document", () => {

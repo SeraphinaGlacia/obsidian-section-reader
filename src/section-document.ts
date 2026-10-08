@@ -38,7 +38,7 @@ export function frontmatterEnd(source: string): number {
 }
 
 /** Parse the current editor buffer, including changes not yet in MetadataCache. */
-export function parseSectionDocument(source: string): CardDocument {
+export function parseSectionDocument(source: string, editingRange?: SectionRange): CardDocument {
   const start = frontmatterEnd(source);
   const body = source.slice(start);
   const tree = sectionParser.parse(body);
@@ -46,6 +46,7 @@ export function parseSectionDocument(source: string): CardDocument {
   for (let node = tree.topNode.firstChild; node !== null; node = node.nextSibling) {
     if (node.name !== "HorizontalRule") continue;
     const offset = start + node.from;
+    if (editingRange !== undefined && offset >= editingRange.from && offset < editingRange.to) continue;
     const lineStart = source.lastIndexOf("\n", offset - 1) + 1;
     const line = source.slice(0, offset).split("\n").length - 1;
     sections.push({
@@ -68,15 +69,16 @@ export function sectionRange(document: CardDocument, index: number): SectionRang
   const card = document.cards[index]!;
   const propertiesEnd = index === 0 ? frontmatterEnd(document.source) : 0;
   let from = Math.max(card.start, propertiesEnd);
-  // Hide the blank separator after properties with the same source-preserving
-  // mask. Keep indentation on the first content line and all body whitespace.
-  if (propertiesEnd > 0) {
+  // Hide boundary spacing after properties or a section separator. Preserve
+  // the first content line's indentation and whitespace within the body.
+  if (propertiesEnd > 0 || card.segmentIndex > 0) {
     from += /^(?:[\t ]*\r?\n)*/.exec(document.source.slice(from))![0].length;
   }
   let to = card.end;
-  // The newline before a separator belongs to the protected boundary.
-  if (to < document.source.length && document.source[to - 1] === "\n") {
-    to -= document.source[to - 2] === "\r" ? 2 : 1;
+  // Preserve the spacing before a separator too: typing into its blank line
+  // could otherwise turn the following dashes into a Setext heading underline.
+  if (to < document.source.length) {
+    to -= /(?:\r?\n[\t ]*)+$/.exec(document.source.slice(from, to))?.[0].length ?? 0;
   }
   return { from: Math.min(from, to), to };
 }

@@ -106,9 +106,13 @@ Total assets stay the same: equipment increases while cash decreases.
 
 The editor retains the entire Markdown document and its original positions. Select text **in Editing view**, then run your usual Templater command. For example, a template containing `【<% tp.file.selection() %>】` can wrap the selected word while the current section stays focused. Templater is a separate plugin, not a dependency bundled with Section Reader. Reading-view text selection follows native Obsidian behavior; it is not converted into an editor selection.
 
-Typing, selection, and deletion stay inside the visible section. To edit a separating `---` line, frontmatter, or the whole note, turn section focus off. Native undo/redo and programmatic whole-document updates remain available; undo/redo can reveal another section when that is where the edit happened. New separators are recognized from the editor buffer without waiting for the metadata cache.
+Typing, selection, and deletion stay inside the visible section. To edit an existing section separator, frontmatter, or the whole note, turn section focus off. Native undo/redo and programmatic whole-document updates remain available; undo/redo can reveal another section when that is where the edit happened.
 
-In focused editing, blank lines between YAML properties and the first section are hidden with the properties. The first content line keeps its native formatting. The original whitespace remains in the file and returns when section focus is disabled.
+You can type or paste new `---` separators inside a focused section. The editing area stays open while you type the new section's content. Switching to Reading view or navigating to another section applies the new boundaries, using the cursor's section as the starting point. The source is saved normally throughout; a partially typed separator does not force a page turn.
+
+In focused editing, section separators and their surrounding blank lines are masked, as are YAML properties and the blank lines after them. The first content line keeps its native formatting in every section. Source spacing remains in the file and returns when section focus is disabled; ordinary horizontal rules inside the section remain visible.
+
+For reliable `---` separators, leave a blank line above and below. CommonMark does not require blank lines around every thematic break, but `---` directly below paragraph text can instead be a Setext heading underline. These source-formatting rules are independent of the focus mask. See the [CommonMark thematic break rules](https://spec.commonmark.org/0.31.2/#thematic-breaks).
 
 Compatibility is verified with Templater's selection replacement in a test vault. Custom Anki templates and integrations still need testing with their own configuration. See the [0.3.0 validation notes](docs/native-focus-validation.md) for the checks and remaining device coverage.
 

@@ -4,7 +4,7 @@ import type { EditorView } from "@codemirror/view";
 import { resolveCardIndex } from "./cards";
 import type { CardDocument } from "./cards";
 import { EdgeDoubleTapGesture, edgeTapSideForPosition } from "./edge-tap";
-import { editorFocusField, focusEditor } from "./focus-editor";
+import { editorFocusField, finishFocusedEditing, focusEditor } from "./focus-editor";
 import type { EditorFocus } from "./focus-editor";
 import type { Translations } from "./i18n";
 import { lineAtOffset, offsetAtLine, parseSectionDocument, sectionIndexAt, sectionRange } from "./section-document";
@@ -104,6 +104,7 @@ export class FocusSession extends Component {
   }
 
   navigate(direction: -1 | 1): boolean {
+    if (this.view.getMode() === "source") this.finishEditing();
     const next = this.index + direction;
     if (next < 0 || next >= this.document.cards.length) return false;
     this.select(next, undefined, direction);
@@ -130,7 +131,9 @@ export class FocusSession extends Component {
   }
 
   editorChanged(focus: EditorFocus): void {
-    const changed = this.document.source !== focus.document.source || this.index !== focus.index;
+    const changed = this.document !== focus.document || this.index !== focus.index;
+    if (this.document.cards.length !== focus.document.cards.length) this.scrollPositions.clear();
+    if (changed) this.previewBounds = undefined;
     this.document = focus.document;
     this.index = focus.index;
     if (changed) { this.updateCounter(); this.schedule(); }
@@ -153,6 +156,11 @@ export class FocusSession extends Component {
     focusEditor(editor, this.index, anchor);
   }
 
+  private finishEditing(): void {
+    const editor = this.host.editorFor(this.view);
+    if (editor !== undefined) finishFocusedEditing(editor);
+  }
+
   schedule(): void {
     if (this.stopped || this.frame !== null) return;
     this.frame = this.view.containerEl.ownerDocument.defaultView!.requestAnimationFrame(() => {
@@ -161,6 +169,7 @@ export class FocusSession extends Component {
       const mode = this.view.getMode();
       if (mode !== this.mode) {
         this.transition.cancel();
+        if (this.mode === "source") this.finishEditing();
         this.mode = mode;
         this.restoreScroll = true;
         if (mode === "source") this.syncEditor();
@@ -264,6 +273,7 @@ export class FocusSession extends Component {
       if (cache !== null) line = resolveSubpath(cache, state.subpath)?.start.line ?? line;
     }
     if (line === undefined) return;
+    if (this.view.getMode() === "source") this.finishEditing();
     const offset = offsetAtLine(this.document.source, line);
     this.select(sectionIndexAt(this.document, offset), offset);
   }

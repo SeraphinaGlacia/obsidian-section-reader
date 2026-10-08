@@ -134,7 +134,7 @@ describe("section focus on a native view", () => {
   it("retains reading scroll separately for each section", () => {
     const { session, preview } = setup();
     preview.scrollTop = 125;
-    session.navigate(1); expect(preview.scrollTop).toBe(5);
+    session.navigate(1); expect(preview.scrollTop).toBe(6);
     preview.scrollTop = 45;
     session.navigate(-1); expect(preview.scrollTop).toBe(125);
     session.navigate(1); expect(preview.scrollTop).toBe(45);

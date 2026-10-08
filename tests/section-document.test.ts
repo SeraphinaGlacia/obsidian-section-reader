@@ -35,8 +35,8 @@ describe("live section parsing", () => {
     const first = sectionRange(document, 0);
     const second = sectionRange(document, 1);
     expect(first.from).toBe(source.indexOf("One"));
-    expect(source.slice(first.from, first.to)).toBe("One\n");
-    expect(source.slice(first.to, second.from)).toBe("\n---\n");
+    expect(source.slice(first.from, first.to)).toBe("One");
+    expect(source.slice(first.to, second.from)).toBe("\n\n---\n\n");
   });
 
   it.each(["\n", "\r\n"])("masks only complete blank lines after frontmatter with %j line endings", (newline) => {
@@ -44,12 +44,25 @@ describe("live section parsing", () => {
     const document = parseSectionDocument(source);
     const first = sectionRange(document, 0);
     expect(first.from).toBe(source.indexOf("  # One"));
-    expect(source.slice(first.from, first.to)).toBe(["  # One", "", "Body", ""].join(newline));
-    expect(source.slice(sectionRange(document, 1).from)).toBe(newline + "# Two");
+    expect(source.slice(first.from, first.to)).toBe(["  # One", "", "Body"].join(newline));
+    expect(source.slice(sectionRange(document, 1).from)).toBe("# Two");
     expect(document.source).toBe(source);
     expect(sectionRange(parseSectionDocument(newline + "# No properties"), 0).from).toBe(0);
     const empty = ["---", "title: Empty", "---", "", ""].join(newline);
     expect(sectionRange(parseSectionDocument(empty), 0)).toEqual({ from: empty.length, to: empty.length });
+  });
+
+  it.each(["", "\n", "\n\n\n"])("excludes section delimiters and their spacing (gap %j)", (gap) => {
+    const source = "# One\n\nBody\n\n---\n" + gap + "# Two\n\nBody\n\n---\n" + gap + "# Three";
+    const document = parseSectionDocument(source);
+    expect(document.cards).toHaveLength(3);
+    for (const [index, heading] of ["# One", "# Two", "# Three"].entries()) {
+      expect(sectionRange(document, index).from).toBe(source.indexOf(heading));
+    }
+    const first = sectionRange(document, 0);
+    const edited = source.slice(0, first.to) + " appended" + source.slice(first.to);
+    expect(parseSectionDocument(edited).cards).toHaveLength(3);
+    expect(document.source).toBe(source);
   });
 
   it("supports empty frontmatter and literal comment delimiters in inline code", () => {
