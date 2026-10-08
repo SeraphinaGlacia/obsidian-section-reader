@@ -4,11 +4,12 @@ import type { MarkdownPostProcessorContext, MarkdownView } from "obsidian";
 import { FocusSession } from "../src/focus-session";
 import type { SessionHost } from "../src/focus-session";
 import { translationsForLanguage } from "../src/i18n";
+import { parseSectionDocument } from "../src/section-document";
 
 const source = "# One\n\nFirst\n\n---\n\n# Two\n\nSecond\n\n---\n\n# Three\n\nThird";
 let cleanup: (() => void) | undefined;
 
-function setup(mode = "preview", allowNativeModes = true) {
+function setup(mode = "preview", allowNativeModes = true, initial?: { index?: number; key?: string }) {
   const file = Object.assign(new TFile(), { path: "Note.md" });
   const contentEl = document.createElement("div");
   document.body.append(contentEl);
@@ -41,7 +42,7 @@ function setup(mode = "preview", allowNativeModes = true) {
   } as unknown as MarkdownView;
   const progress = { get: vi.fn(), set: vi.fn() };
   const host = { text: translationsForLanguage("en"), progress, blocks, allowNativeModes, editorFor: () => undefined, stop: vi.fn(), notifyReadOnly: vi.fn() } as unknown as SessionHost;
-  const session = new FocusSession(view, host);
+  const session = new FocusSession(view, host, initial?.index, initial?.key);
   session.onload();
   vi.advanceTimersByTime(32);
   cleanup = () => session.unload();
@@ -70,6 +71,18 @@ afterEach(() => {
 });
 
 describe("section focus on a native view", () => {
+  it("restores the keyed section when its saved index has shifted", () => {
+    const key = parseSectionDocument(source).cards[1]!.key;
+    const { session } = setup("preview", true, { index: 0, key });
+    expect(session.index).toBe(1);
+    expect(session.document.cards[session.index]!.source).toContain("Second");
+  });
+
+  it("falls back to the saved index if migrated content no longer matches", () => {
+    const { session } = setup("preview", true, { index: 2, key: "removed-section" });
+    expect(session.index).toBe(2);
+  });
+
   it("locks native editing for the session and applies a setting change only after re-entry", async () => {
     const { view, host } = setup("source", false);
     expect(view.getMode()).toBe("preview");
@@ -128,6 +141,25 @@ describe("section focus on a native view", () => {
     window.getSelection()?.addRange(range);
     expect(key(contentEl, "ArrowRight").defaultPrevented).toBe(false);
     expect(session.index).toBe(1);
+  });
+
+  it("exits reading focus with Escape while text is selected", () => {
+    const { view, host, contentEl, elements } = setup();
+    const stop = vi.fn(); host.stop = stop;
+    const range = document.createRange(); range.selectNodeContents(elements[0]!);
+    window.getSelection()?.addRange(range);
+    expect(key(contentEl, "ArrowRight").defaultPrevented).toBe(false);
+    expect(key(contentEl, "Escape").defaultPrevented).toBe(true);
+    expect(stop).toHaveBeenCalledWith(view);
+  });
+
+  it.each(["a", "input", "button", "pre", "table"])("exits reading focus with Escape from %s", (tag) => {
+    const { view, host, contentEl } = setup();
+    const stop = vi.fn(); host.stop = stop;
+    const target = document.createElement(tag); contentEl.append(target);
+    expect(key(target, "ArrowRight").defaultPrevented).toBe(false);
+    expect(key(target, "Escape").defaultPrevented).toBe(true);
+    expect(stop).toHaveBeenCalledWith(view);
   });
 
   it.each(["source", "preview"])("retains edge double-taps in %s without pagination controls", (mode) => {

@@ -5,6 +5,28 @@ import type { CardDocument } from "./cards";
 
 export interface SectionRange { from: number; to: number }
 
+function scanComments(text: string, open = false): { found: boolean; open: boolean } {
+  let found = open;
+  let offset = 0;
+  const tokens = /\\.|(`+)[\s\S]*?\1|%%/g;
+  while (offset < text.length) {
+    if (open) {
+      const end = text.indexOf("%%", offset);
+      if (end < 0) break;
+      offset = end + 2;
+      open = false;
+    } else {
+      // Escapes and inline code only mask delimiters outside a comment.
+      tokens.lastIndex = offset;
+      const token = tokens.exec(text);
+      if (token === null) break;
+      offset = tokens.lastIndex;
+      if (token[0] === "%%") { found = true; open = true; }
+    }
+  }
+  return { found, open };
+}
+
 const sectionParser = parser.configure({
   defineNodes: ["MathBlock", "CommentBlock"],
   parseBlock: [{
@@ -12,21 +34,18 @@ const sectionParser = parser.configure({
     before: "HorizontalRule",
     parse(context, line) {
       const text = line.text.slice(line.pos);
-      const comment = text.replace(/(`+)[\s\S]*?\1/g, (code) => " ".repeat(code.length)).match(/(^|[^\\])%%/);
-      const commentStart = comment === null ? -1 : comment.index! + comment[1]!.length;
-      const delimiter = text.startsWith("$$") ? "$$" : commentStart >= 0 ? "%%" : null;
-      if (delimiter === null || line.indent - line.baseIndent >= 4) return false;
+      const math = text.startsWith("$$");
+      const comment = scanComments(text);
+      if ((!math && !comment.found) || line.indent - line.baseIndent >= 4) return false;
       const start = context.lineStart + line.pos;
       let end = context.lineStart + line.text.length;
-      const delimiterStart = delimiter === "%%" ? commentStart : 0;
-      if (!text.slice(delimiterStart + 2).includes(delimiter)) {
-        while (context.nextLine()) {
-          end = context.lineStart + line.text.length;
-          if (line.text.includes(delimiter)) break;
-        }
+      let open = math ? !text.slice(2).includes("$$") : comment.open;
+      while (open && context.nextLine()) {
+        end = context.lineStart + line.text.length;
+        open = math ? !line.text.includes("$$") : scanComments(line.text, true).open;
       }
       context.nextLine();
-      context.addElement(context.elt(delimiter === "$$" ? "MathBlock" : "CommentBlock", start, end));
+      context.addElement(context.elt(math ? "MathBlock" : "CommentBlock", start, end));
       return true;
     },
   }],

@@ -37,6 +37,18 @@ Native checks were performed on 2026-10-08 in a separate temporary vault on macO
 
 Automated tests exercise live separator parsing, full-document coordinates, hidden-boundary deletion protection, selection confinement, external replacement, history navigation, session cleanup, reading scroll state, detached preview filtering, embedded view isolation, keyboard precedence, and mobile gesture guards. `pnpm run check` also checks both the current and minimum Obsidian API, lint, release guards, production build, and package consistency.
 
+## Post-merge review follow-up
+
+The automated review of PR #9 completed at 12:47:13 UTC on 2026-10-08, after the merge at 12:46:04 UTC. Publication was paused to address all three findings. Each finding was reproduced before its fix; the follow-up adds 14 unit regressions and passed 34 targeted native checks in the same isolated Obsidian 1.14.4 vault.
+
+| Finding | Fix and native verification |
+| --- | --- |
+| [Escape blocked after reading interactions](https://github.com/SeraphinaGlacia/obsidian-section-reader/pull/9#discussion_r4219095075) | Selection and interactive-target guards apply only to arrow pagination. Escape exits with selected text or a focused native link, task checkbox, code block, or table. Arrows preserve those interactions, including native tables without a wrapper. Editing Escape remains with the native editor. |
+| [Prematurely closed comment state](https://github.com/SeraphinaGlacia/obsidian-section-reader/pull/9#discussion_r4219095083) | Scan all comment delimiters on each line, including closing and reopening a comment on a continuation line. Six cases cover reopened comments, closed comments, inline code, and escaped delimiters. The three multiline cases match the native editor's `comment_hr` syntax nodes; commented rules stay inside the section while the next real rule splits it. |
+| [Lost section key during legacy migration](https://github.com/SeraphinaGlacia/obsidian-section-reader/pull/9#discussion_r4219095089) | Carry the saved `cardKey` into the native focus session and resolve it against the current document. Inserting a preceding section restores the original content at its new index. Key-only states also restore correctly; removed keys and index-only states fall back to the saved index. |
+
+The native checks verify full-source preservation for all three areas. They use the actual plugin and native views; keyboard events are dispatched programmatically. These checks do not extend the physical-device or minimum-runtime coverage described below.
+
 ## Maintainer acceptance before merge
 
 1. In a test vault, first check read-only browsing and the requirement to exit before editing. Enable native mode switching in settings, exit and re-enter Section Reader, and verify independent native mode switching while retaining the section. Changing the preference during a session should take effect only on re-entry.
@@ -46,4 +58,4 @@ Automated tests exercise live separator parsing, full-document coordinates, hidd
 
 Physical iOS/Android devices and an actual Obsidian 1.8.7 runtime were not available for this run. Minimum-version compatibility has API type coverage, not a native runtime certification. Other editor extensions, themes, and custom templates can require their own acceptance checks. Templater has its own Obsidian version requirements. Reading-view DOM selection is not converted into editor selection.
 
-This work prepares a pull request and the 0.3.0 version files. It does not merge the pull request, create a version tag, or publish a release.
+Validation and release verification are separate steps. Passing these checks does not create a version tag or publish a release.

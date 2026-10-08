@@ -42,16 +42,18 @@ export class FocusSession extends Component {
   private previewNeedsRerender = false;
   private readonly transition: SectionTransition;
 
-  constructor(readonly view: MarkdownView, private readonly host: SessionHost, initialIndex?: number) {
+  constructor(readonly view: MarkdownView, private readonly host: SessionHost, initialIndex?: number, initialKey?: string) {
     super();
     this.file = view.file!;
     this.nativeModesEnabled = host.allowNativeModes;
     this.transition = new SectionTransition(view.contentEl);
     this.document = parseSectionDocument(view.getViewData());
     const saved = host.progress.get(this.file.path);
-    this.index = initialIndex ?? (view.getMode() === "source"
-      ? sectionIndexAt(this.document, view.editor.posToOffset(view.editor.getCursor()))
-      : resolveCardIndex(this.document, saved?.index ?? 0, saved?.cardKey));
+    this.index = initialIndex !== undefined || initialKey !== undefined
+      ? resolveCardIndex(this.document, initialIndex ?? saved?.index ?? 0, initialKey)
+      : view.getMode() === "source"
+        ? sectionIndexAt(this.document, view.editor.posToOffset(view.editor.getCursor()))
+        : resolveCardIndex(this.document, saved?.index ?? 0, saved?.cardKey);
     this.index = Math.max(0, Math.min(this.index, this.document.cards.length - 1));
     this.mode = view.getMode();
     this.counter = createDiv();
@@ -291,9 +293,10 @@ export class FocusSession extends Component {
 
   private handleKey(event: KeyboardEvent): void {
     if (this.view.getMode() !== "preview" || event.defaultPrevented || event.isComposing ||
-      event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || isInteractiveTarget(event.target) ||
-      hasActiveTextSelection(this.view.containerEl.ownerDocument.defaultView!.getSelection())) return;
+      event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      if (isInteractiveTarget(event.target) ||
+        hasActiveTextSelection(this.view.containerEl.ownerDocument.defaultView!.getSelection())) return;
       this.navigate(event.key === "ArrowLeft" ? -1 : 1);
     } else if (event.key === "Escape") this.host.stop(this.view);
     else return;
