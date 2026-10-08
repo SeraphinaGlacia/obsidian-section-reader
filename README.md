@@ -8,7 +8,7 @@
 
 > Read and edit long notes one section at a time, without splitting files.
 
-Section Reader adds section focus to Obsidian's native Markdown view. Sections separated by root-level `---` lines appear one at a time, while the complete note stays in its original file. Enable native mode switching in settings to switch between Reading view and Editing view, including Live Preview and Source mode, without leaving section focus. Native links, embeds, task interactions, and reading progress remain available. Browsing does not change your Markdown; editing and task checkbox actions save through Obsidian.
+Section Reader adds section focus to Obsidian's native Markdown view: content separated by root-level `---` lines is shown one section at a time, while the complete note remains in its original file. After enabling native mode switching in settings, you can switch between Reading view and Editing view, including Live Preview and Source mode, while keeping focus. Native links, embeds, task interactions, and reading progress remain available.
 
 Requires **Obsidian 1.8.7 or later**, for desktop and mobile.
 
@@ -95,12 +95,12 @@ Total assets stay the same: equipment increases while cash decreases.
 ```
 
 - **Enter and exit:** Click the “Toggle Section Reader” ribbon icon, or run “Toggle section focus”. Trigger it again to show the full note. In Reading view, `Esc` also exits focus; in Editing view, `Esc` keeps its native behavior.
-- **Read and edit:** Enable “Allow native reading/editing mode switching” in Section Reader settings, then exit and re-enter Section Reader. You can use Obsidian's native reading/editing command or view control while keeping the current section. With the setting off, Section Reader stays read-only until you exit. Setting changes apply only on re-entry; configured shortcuts stay unchanged.
-- **Turn pages:** In desktop Reading view, click the note and use `←` / `→`. In Editing view, these keys always belong to the editor; assign your own shortcuts to “Previous section” and “Next section” for navigation. On mobile, double-tap the left / right window edge in either mode. There are no added pagination buttons or toolbar controls. Selection, dragging, composition, and interactive controls take precedence over navigation.
-- **Jump and resume:** The Outline and same-note heading, block, and footnote links reveal the destination section. Entering focus from Editing view selects the cursor's section; entering from Reading view resumes the saved section. Each entry, section navigation, and reading/editing switch starts at the top of the card. Closing a tab ends its focus session but preserves the saved section.
+- **Read and edit:** Enable “Allow native reading/editing mode switching” in Section Reader settings, then exit and re-enter Section Reader. You can use Obsidian's native reading/editing command or view control while keeping the current section. With the setting off, Section Reader stays read-only until you exit.
+- **Turn pages:** In desktop Reading view, click the note and use `←` / `→`. In Editing view, these keys always belong to the editor; assign your own shortcuts to “Previous section” and “Next section” for navigation. On mobile, double-tap the left / right window edge in either mode.
+- **Jump and resume:** The Outline and same-note heading, block, and footnote links reveal the destination section. Entering focus from Editing view selects the cursor's section; entering from Reading view resumes the saved section. Each entry, section navigation, or reading/editing mode switch starts at the top of the card. Closing a tab ends its focus session but preserves the saved section.
 - **Quick access:** Configure your own hotkeys under “Settings → Hotkeys”. On mobile, the focus toggle can use Obsidian's ribbon or Quick Action; use the native reading/editing control for mode changes. No default hotkeys are assigned.
 
-## 3.3 Commands
+### 3.3 Commands
 
 | Command | ID |
 | --- | --- |
@@ -110,7 +110,7 @@ Total assets stay the same: equipment increases while cash decreases.
 
 ## 4. Development
 
-Use Node.js 24 LTS and pnpm 11.7.0, as declared in `.node-version` and `package.json`. Source builds also support Node.js 22.13+ in the 22.x line and Node.js 24 or newer. The pnpm version is fixed by `packageManager`; another pnpm launcher downloads and runs that pinned version. Dependency overrides and reviewed installation scripts are configured in `pnpm-workspace.yaml`.
+Use Node.js 24 LTS and pnpm 11.7.0, as declared in `.node-version` and `package.json`. Source builds also support Node.js 22.13+ in the 22.x line and Node.js 24 or newer. The `packageManager` field fixes the pnpm version; when launched from another pnpm version, it downloads and uses the pinned version. Dependency overrides and reviewed installation scripts are configured in `pnpm-workspace.yaml`.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -132,25 +132,25 @@ pnpm run check
 
 ## 1. Interface language
 
-The plugin reads Obsidian's current interface language when it loads: Chinese language codes (`zh`, `zh-CN`, `zh-TW`, etc.) use Chinese; English and all other languages use English. After changing Obsidian's interface language, reload the plugin or restart Obsidian to refresh all command names.
+When the plugin loads, it reads Obsidian's current interface language: Chinese language codes (`zh`, `zh-CN`, `zh-TW`, and so on) display Chinese; English and all other languages display English. After changing Obsidian's interface language, reload the plugin or restart Obsidian so that all command names are refreshed.
 
 ## 2. Splitting rules
 
-A line splits cards only when it meets both of these conditions:
+Only a line that meets both of the following conditions splits cards:
 
 1. Its source text is exactly `---`, with no spaces or other characters.
-2. It is a horizontal rule at the root level of the Markdown document.
+2. It is a Markdown root-level horizontal rule.
 
-Therefore, identical-looking text in YAML frontmatter, code blocks, blockquotes, lists, HTML blocks, or Setext headings does not split cards, nor do `***` / `___`. Empty cards created by consecutive, leading, or trailing separators are ignored.
+Therefore, matching text in YAML frontmatter, code blocks, blockquotes, lists, HTML blocks, and Setext headings, as well as `***` / `___`, does not split cards. Empty cards produced by consecutive, leading, or trailing separators are ignored.
 
 ## 3. Feature scope
 
-- The native Markdown view retains the full document. Reading-view blocks are filtered by their original source lines, preserving context for footnotes, reference definitions, links, embeds, and task interactions. Editing uses the native CodeMirror editor with sections outside the focus hidden.
-- Cards follow the normal Markdown view's readable line length and margin settings, and do not extend to either edge of the desktop window.
-- Each card can scroll vertically. Entering or returning to a card starts at its top in both native modes; the saved progress remembers the section, without retaining its scroll position.
+- The native Markdown view retains the complete document. Reading view filters content blocks by their original line numbers, preserving the full context for footnotes, reference definitions, links, embeds, and task interactions; Editing view uses the native CodeMirror editor and hides content outside the focused range.
+- Card content follows the readable line width and page-margin settings of the normal Markdown view, rather than touching the sides of the desktop window.
+- Each card can scroll vertically. In Reading and Editing view, entering or returning to a card starts at the top; progress remembers only the current section, not the scroll position within a card.
 - In Reading view, internal links to other notes open in a new tab in the normal Markdown view, while the original tab stays in focus mode. Heading and block links within the same note navigate in the current card view; clicking with a modifier key can still open them in a new tab.
-- On desktop, internal-link hover previews are handled through Obsidian's native Page preview events. With Hover Editor enabled, the same interactive preview popovers are available in card mode.
-- Browsing does not modify Markdown. Text edits, templates, and task checkbox changes use the original file through the native editor and renderer.
+- On desktop, internal-link hover previews are handled through Obsidian's native Page Preview events. With Hover Editor enabled, the same interactive preview popovers are available in card mode.
+- Browsing does not modify Markdown. Text edits, templates, and task checkbox changes update the original file through the native editor and renderer.
 - The current version does not include fullscreen presentations, autoplay, export, a theme system, custom separators, or visible page navigation buttons.
 
 </details>
