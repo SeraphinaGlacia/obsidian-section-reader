@@ -70,6 +70,27 @@ describe("live section parsing", () => {
     expect(parseSectionDocument("Use `%%`\n\n---\n\nNext").cards).toHaveLength(2);
   });
 
+  it.each([
+    "Text %%one%% more %%two\n\n---\n\nend %%",
+    "Text %%one\nend %% more %%two\n\n---\n\nend %%",
+    "Text %%one%%%%two\n\n---\n\nend %%",
+  ])("keeps separators inside a reopened comment: %s", (comment) => {
+    const source = comment + "\n\n---\n\nVisible section";
+    const document = parseSectionDocument(source);
+    expect(document.cards).toHaveLength(2);
+    expect(document.cards[0]!.source).toContain(comment);
+    expect(document.cards[1]!.source.trim()).toBe("Visible section");
+    expect(document.source).toBe(source);
+  });
+
+  it.each([
+    "Text %%one%% and %%two%%",
+    "Text %%one%% and `%%`",
+    "Text %%one%% and \\%% literal",
+  ])("recognizes real separators after closed comments: %s", (line) => {
+    expect(parseSectionDocument(line + "\n\n---\n\nVisible section").cards).toHaveLength(2);
+  });
+
   it("handles CRLF, empty files, trailing rules, and consecutive rules", () => {
     const source = "# One\r\n\r\n---\r\n\r\n---\r\n\r\n# Two\r\n\r\n---\r\n";
     const document = parseSectionDocument(source);
